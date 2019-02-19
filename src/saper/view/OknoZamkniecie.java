@@ -1,5 +1,7 @@
 package saper.view;
 
+import saper.Saper;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.Serializable;
@@ -19,9 +21,9 @@ public class OknoZamkniecie extends JFrame implements Serializable, ActionListen
 	private JButton jb1;
 	private JButton jb2;
 	private JButton jb3;
-	private Saper sap;
+	private OknoGlowne sap;
 	
-	OknoZamkniecie(Saper sap){
+	OknoZamkniecie(OknoGlowne sap){
 		this.kolumny = sap.getKolumny();
 		this.xRamki = sap.getJf().getX();
 		this.yRamki = sap.getJf().getY();
@@ -34,7 +36,7 @@ public class OknoZamkniecie extends JFrame implements Serializable, ActionListen
 
 	public void wyswietlOkno() {
 	
-		setTitle("Saper");
+		setTitle("OknoGlowne");
 		setVisible(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(kolumny*35+70, 200);
@@ -68,7 +70,7 @@ public class OknoZamkniecie extends JFrame implements Serializable, ActionListen
 			System.exit(0);
 		}
 		if(e.getSource()==jb2) {
-			Saper sap1 = new Saper(sap.getWiersze(),sap.getKolumny(),sap.getIleMin());
+			OknoGlowne sap1 = new OknoGlowne(sap.getWiersze(),sap.getKolumny(),sap.getIleMin());
 			sap1.doDziela();
 			Saper.zapisz(sap1);
 			System.exit(0);

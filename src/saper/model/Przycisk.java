@@ -2,7 +2,8 @@ package saper.model;
 
 import saper.subject.Subject;
 import saper.obserwator.Obserwator;
-import saper.view.Saper;
+import saper.view.OknoGlowne;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import javax.swing.*;
@@ -11,10 +12,10 @@ public class Przycisk extends JButton implements Obserwator, Serializable, Subje
 	
     private int ileMinWokol;
 	private int ileKlikniec;
-	private Saper sap;
+	private OknoGlowne sap;
 	private ArrayList<Obserwator> obserwatorzy;
 //-----------------------------------------------------		
-	public Przycisk(Saper sap){
+	public Przycisk(OknoGlowne sap){
 		this.sap = sap;
 		obserwatorzy = new ArrayList<Obserwator>();
 	}

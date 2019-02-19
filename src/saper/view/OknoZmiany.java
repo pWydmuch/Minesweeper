@@ -1,5 +1,7 @@
 package saper.view;
 
+import saper.Saper;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -53,7 +55,7 @@ public class OknoZmiany extends JFrame implements Serializable, ActionListener,I
 
 	public void wyswietlOkno() {
 		 
-			setTitle("Saper");
+			setTitle("OknoGlowne");
 			setVisible(true);
 			setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 			setSize(330, 250);
@@ -131,7 +133,7 @@ public void actionPerformed(ActionEvent e) {
 			jl.setText("Ilo�� min z poza zakresu");
 		}
 		else {
-		Saper sap = new Saper(ileNowyWysokosc,ileNowySzerokosc,ileNowyMin);
+		OknoGlowne sap = new OknoGlowne(ileNowyWysokosc,ileNowySzerokosc,ileNowyMin);
 		sap.doDziela();
 		Saper.zapisz(sap);
 		jf.setVisible(false);

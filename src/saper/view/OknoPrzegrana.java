@@ -24,7 +24,7 @@ public class OknoPrzegrana extends JFrame implements Serializable,ActionListener
 	private JFrame jf;
 	
 	
-	OknoPrzegrana( Saper sap){
+	OknoPrzegrana( OknoGlowne sap){
 		this.kolumny = sap.getKolumny();
 		this.wiersze = sap.getWiersze();
 		this.ileMin = sap.getIleMin();
@@ -37,7 +37,7 @@ public class OknoPrzegrana extends JFrame implements Serializable,ActionListener
 
 	public void wyswietlOkno() {
 			
-			setTitle("Saper");
+			setTitle("OknoGlowne");
 			setVisible(true);
 			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			setSize(kolumny*35+70, 200);
@@ -68,12 +68,12 @@ public class OknoPrzegrana extends JFrame implements Serializable,ActionListener
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == jb1) System.exit(0);
 		if(e.getSource() == jb2) {
-			new Saper(wiersze,kolumny,ileMin,losowanie).doDziela();
+			new OknoGlowne(wiersze,kolumny,ileMin,losowanie).doDziela();
 			jf.dispose();
 			this.dispose();
 		}
 		if(e.getSource()==jb3) {
-			new Saper(wiersze,kolumny,ileMin).doDziela();
+			new OknoGlowne(wiersze,kolumny,ileMin).doDziela();
 			jf.dispose();
 			this.dispose();
 		}

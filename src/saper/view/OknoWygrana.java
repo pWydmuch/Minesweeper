@@ -1,21 +1,19 @@
 package saper.view;
 
+import saper.Saper;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.Serializable;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import saper.model.MaszynaLosujaca;
 
-
-
-	public class OknoWygrana extends JFrame implements Serializable,ActionListener {
+public class OknoWygrana extends JFrame implements Serializable,ActionListener {
 		
 	
 		private int czas;
@@ -26,7 +24,7 @@ import saper.model.MaszynaLosujaca;
 		private int kolumny;
 		private int wiersze;
 		
-		OknoWygrana(Saper sap){
+		OknoWygrana(OknoGlowne sap){
 			
 			this.kolumny = sap.getKolumny();
 			this.wiersze = sap.getWiersze();
@@ -39,7 +37,7 @@ import saper.model.MaszynaLosujaca;
 
 		public void wyswietlOkno() {
 				
-				setTitle("Saper");
+				setTitle("OknoGlowne");
 				setVisible(true);
 				setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				setSize(250, 200);
@@ -68,14 +66,14 @@ import saper.model.MaszynaLosujaca;
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if(e.getSource() == jb1) {
-				Saper sap1 = new Saper(wiersze,kolumny,ileMin);
+				OknoGlowne sap1 = new OknoGlowne(wiersze,kolumny,ileMin);
 				sap1.doDziela();
 				Saper.zapisz(sap1);
 				System.exit(0);
 			}
 			
 			if(e.getSource()==jb2) {
-				new Saper(wiersze,kolumny,ileMin).doDziela();
+				new OknoGlowne(wiersze,kolumny,ileMin).doDziela();
 				jf.dispose();
 				this.dispose();
 			}

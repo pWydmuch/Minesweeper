@@ -4,10 +4,8 @@ import saper.model.MaszynaLosujaca;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -15,10 +13,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class Saper implements ActionListener,WindowListener, Serializable  {
+public class OknoGlowne implements ActionListener,WindowListener, Serializable  {
 
-	
-	private static final long serialVersionUID = 1161474195722226307L;
+
 	private Map<Integer,ImageIcon> map;
 	private Timer tm;    // SPROBUJ USTAWIC TEN WATEK JAKO DEMON
 	private ImageIcon znak;
@@ -43,7 +40,7 @@ public class Saper implements ActionListener,WindowListener, Serializable  {
 
 			
 //-------------------------------------------------------------------------------------
-	public Saper(int wiersze, int kolumny, int ileMin) {
+	public OknoGlowne(int wiersze, int kolumny, int ileMin) {
 		
 		
 		this.wiersze = wiersze;
@@ -71,7 +68,7 @@ public class Saper implements ActionListener,WindowListener, Serializable  {
 			
 		}}
 	
-	public Saper(int wiersze, int kolumny, int ileMin, MaszynaLosujaca losowanie) {
+	public OknoGlowne(int wiersze, int kolumny, int ileMin, MaszynaLosujaca losowanie) {
 		this(wiersze, kolumny, ileMin);
 		this.losowanie = losowanie;
 		
@@ -114,39 +111,9 @@ public class Saper implements ActionListener,WindowListener, Serializable  {
 		}
 	}
 //---------------------------------------------------------------------------	
-	
-	
-	public static void zapisz(Saper sap) {
-	
-		  /*Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-		        public void run() {
-		        	
-		        	try(ObjectOutputStream	so1 
-		        			= new ObjectOutputStream(new FileOutputStream("Moje.ser"))) {	        		
-						so1.writeObject(sap);						
-						}catch(Exception e) {
-							e.printStackTrace();
-						}}
-		    }));
-		    */
-		Runtime.getRuntime().addShutdownHook(new Thread(()-> {
-			try(ObjectOutputStream	so1 
-        			= new ObjectOutputStream(new FileOutputStream("Moje.ser"))) {	        		
-				so1.writeObject(sap);						
-				}catch(Exception e) {}}));
-		
-	}
+
 //------------------------------------------------------------------------------------------------------
-	public static void main(String[] args) {
-	
-		try(ObjectInputStream so =
-				 new ObjectInputStream(new FileInputStream("Moje.ser"))) {		 
-			 Saper	sap = (Saper) so.readObject();			
-			 sap.jf.setVisible(true);		
-			}catch(Exception e) {
-				 new Saper(13,13,25).doDziela();				
-			}
-	}
+
 //-------------------------------------------------------------------------------------
 	public void doDziela() {	
 		wypelnijMap();			
@@ -168,7 +135,7 @@ public class Saper implements ActionListener,WindowListener, Serializable  {
 	}
 //----------------------------------------------------------------------------------------------------		
 	private void ustawRamke() {
-		jf.setTitle("Saper");
+		jf.setTitle("OknoGlowne");
 		jf.setVisible(true);
 		jf.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		jf.addWindowListener(this);
@@ -254,7 +221,7 @@ public class Saper implements ActionListener,WindowListener, Serializable  {
 		new OknoZmiany(jf).wyswietlOkno();
 		
 		if(i.getText().equals("Nowa Gra")) {
-			new Saper(wiersze,kolumny,ileMin).doDziela();		
+			new OknoGlowne(wiersze,kolumny,ileMin).doDziela();
 			jf.dispose();
 		}
 		if(i.getText().equals("Zakoñcz"))
@@ -306,7 +273,7 @@ public class Saper implements ActionListener,WindowListener, Serializable  {
 			if(losowanie.sprawdzCzyWygrana(jb,flaga)&& ileFlag==0) {
 				 tm.stop();
 				 tm.setDelay(Integer.MAX_VALUE);
-				new OknoWygrana(Saper.this).wyswietlOkno();
+				new OknoWygrana(OknoGlowne.this).wyswietlOkno();
 				
 			}
 		}
@@ -345,7 +312,7 @@ public class Saper implements ActionListener,WindowListener, Serializable  {
 						jb[losowanie.getX(i)][losowanie.getY(i)].setBackground(Color.RED);	
 						
 						}
-					new OknoPrzegrana(Saper.this).wyswietlOkno();					
+					new OknoPrzegrana(OknoGlowne.this).wyswietlOkno();
 						return;
 					}}
 				
