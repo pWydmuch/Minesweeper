@@ -1,7 +1,5 @@
 package saper.model;
 
-import saper.subject.Subject;
-import saper.obserwator.Obserwator;
 import saper.view.OknoGlowne;
 
 import java.io.Serializable;

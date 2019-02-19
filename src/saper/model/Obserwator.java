@@ -1,4 +1,4 @@
-package saper.obserwator;
+package saper.model;
 
 
 public interface Obserwator {

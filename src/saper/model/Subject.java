@@ -1,5 +1,5 @@
-package saper.subject;
-import saper.obserwator.Obserwator;
+package saper.model;
+import saper.model.Obserwator;
 
 public interface Subject {
 	
