@@ -4,5 +4,7 @@
 out/*
 /out
 /bin
+bin
 .settings/*
+.settings
 .idea
