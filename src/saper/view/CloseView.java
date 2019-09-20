@@ -1,6 +1,6 @@
 package saper.view;
 
-import saper.Saper;
+import saper.Minesweeper;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,35 +12,38 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class OknoZamkniecie extends JFrame implements Serializable, ActionListener {
-	
-	private int kolumny;
-	private int xRamki;
-	private int yRamki;
-	private int hRamki;
+public class CloseView extends JFrame implements Serializable, ActionListener {
+
+    private static final String SAVE = "Save";
+    private static final String DONT_SAVE = "Don't save";
+    private static final String CANCEL = "Cancel";
+	private int columns;
+	private int frameX;
+	private int frameY;
+	private int frameHeight;
 	private JButton jb1;
 	private JButton jb2;
 	private JButton jb3;
-	private OknoGlowne sap;
+	private MainView sap;
 	
-	OknoZamkniecie(OknoGlowne sap){
-		this.kolumny = sap.getKolumny();
-		this.xRamki = sap.getJf().getX();
-		this.yRamki = sap.getJf().getY();
-		this.hRamki = sap.getJf().getHeight();
+	CloseView(MainView sap){
+		this.columns = sap.getColumns();
+		this.frameX = sap.getJf().getX();
+		this.frameY = sap.getJf().getY();
+		this.frameHeight = sap.getJf().getHeight();
 		this.sap = sap;
-		 jb1 = new JButton("Zapisz");
-		 jb2 = new JButton("Nie zapisuj");
-		 jb3 = new JButton("Anuluj");
+		 jb1 = new JButton(SAVE);
+		 jb2 = new JButton(DONT_SAVE);
+		 jb3 = new JButton(CANCEL);
 	}
 
 	public void wyswietlOkno() {
 	
-		setTitle("OknoGlowne");
+		setTitle("MainView");
 		setVisible(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(kolumny*35+70, 200);
-		setLocation(xRamki, yRamki+hRamki/4);
+		setSize(columns *35+70, 200);
+		setLocation(frameX, frameY + frameHeight /4);
 		//jf.setEnabled(false);
 		JPanel jPan = new JPanel();
 		JPanel jPan2 = new JPanel();
@@ -48,7 +51,7 @@ public class OknoZamkniecie extends JFrame implements Serializable, ActionListen
 		jPan.setLayout(new BoxLayout(jPan, BoxLayout.Y_AXIS));
 		add(jPan);
 		
-		JLabel jl = new JLabel("Co chcesz zrobic z trwaj¹c¹ gr¹?");
+		JLabel jl = new JLabel("What do you want to do?");
 		jPan3.add(jl);
 		jPan.add(jPan3);
 		
@@ -66,13 +69,13 @@ public class OknoZamkniecie extends JFrame implements Serializable, ActionListen
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == jb1) {
-			Saper.zapisz(sap);
+			Minesweeper.save(sap);
 			System.exit(0);
 		}
 		if(e.getSource()==jb2) {
-			OknoGlowne sap1 = new OknoGlowne(sap.getWiersze(),sap.getKolumny(),sap.getIleMin());
-			sap1.doDziela();
-			Saper.zapisz(sap1);
+			MainView sap1 = new MainView(sap.getRows(),sap.getColumns(),sap.getMinesNumber());
+			sap1.go();
+			Minesweeper.save(sap1);
 			System.exit(0);
 		}
 			this.dispose();

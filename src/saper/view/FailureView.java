@@ -10,44 +10,47 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import saper.model.MaszynaLosujaca;
+import saper.model.Draw;
 
-public class OknoPrzegrana extends JFrame implements Serializable,ActionListener {
-	
-	private int kolumny;
-	private int ileMin;	
-	private int wiersze;
-	private MaszynaLosujaca losowanie;
+public class FailureView extends JFrame implements Serializable,ActionListener {
+
+    private static final String CLOSE ="Close";
+    private static final String PLAY_AGAIN ="Play again";
+    private static final String BEGINNER ="Beginner";
+	private int columns;
+	private int minesNumber;
+	private int rows;
+	private Draw draw;
 	private JButton jb3 ;
 	private JButton jb2;
 	private JButton jb1;
 	private JFrame jf;
 	
 	
-	OknoPrzegrana( OknoGlowne sap){
-		this.kolumny = sap.getKolumny();
-		this.wiersze = sap.getWiersze();
-		this.ileMin = sap.getIleMin();
+	FailureView(MainView sap){
+		this.columns = sap.getColumns();
+		this.rows = sap.getRows();
+		this.minesNumber = sap.getMinesNumber();
 		this.jf = sap.getJf();			
-		this.losowanie = sap.getLosowanie();
-		jb1 = new JButton("Zakoncz");
-		jb2 = new JButton("Uruchom ponownie te gre");
-		jb3 = new JButton("Zagraj ponownie");
+		this.draw = sap.getDraw();
+		jb1 = new JButton("Close");
+		jb2 = new JButton("Play the same game");
+		jb3 = new JButton("Play again");
 	}
 
-	public void wyswietlOkno() {
+	public void showView() {
 			
-			setTitle("OknoGlowne");
+			setTitle("MainView");
 			setVisible(true);
 			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			setSize(kolumny*35+70, 200);
+			setSize(columns *35+70, 200);
 			setLocation(jf.getX(),jf.getY()+jf.getHeight()/4);
 
 			JPanel jPan = new JPanel();
 			jPan.setLayout(new BoxLayout(jPan,BoxLayout.Y_AXIS));
 			add(jPan);
 			
-			JLabel jl = new JLabel("Niestety ta gra konczy sie twoim niepowodzeniem");
+			JLabel jl = new JLabel("Unfortunately you have failed");
 			
 			JPanel jPan3 = new JPanel();
 			jPan3.add(jl);
@@ -68,12 +71,12 @@ public class OknoPrzegrana extends JFrame implements Serializable,ActionListener
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == jb1) System.exit(0);
 		if(e.getSource() == jb2) {
-			new OknoGlowne(wiersze,kolumny,ileMin,losowanie).doDziela();
+			new MainView(rows, columns, minesNumber, draw).go();
 			jf.dispose();
 			this.dispose();
 		}
 		if(e.getSource()==jb3) {
-			new OknoGlowne(wiersze,kolumny,ileMin).doDziela();
+			new MainView(rows, columns, minesNumber).go();
 			jf.dispose();
 			this.dispose();
 		}

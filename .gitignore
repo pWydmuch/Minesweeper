@@ -8,3 +8,4 @@ bin
 .settings/*
 .settings
 .idea
+game-state.ser

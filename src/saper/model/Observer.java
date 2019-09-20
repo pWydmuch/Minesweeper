@@ -1,7 +1,7 @@
 package saper.model;
 
 
-public interface Obserwator {
+public interface Observer {
 		
 	 void update();		
 }

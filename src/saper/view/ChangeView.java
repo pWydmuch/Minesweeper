@@ -1,6 +1,6 @@
 package saper.view;
 
-import saper.Saper;
+import saper.Minesweeper;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -19,23 +19,29 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 
-public class OknoZmiany extends JFrame implements Serializable, ActionListener,ItemListener {
-	
+public class ChangeView extends JFrame implements Serializable, ActionListener,ItemListener {
+
+    private static final String OK ="OK";
+    private static final String CANCEL ="Cancel";
+    private static final String BEGINNER ="Beginner";
+    private static final String INTERMEDIATE ="Intermediate";
+    private static final String ADVANCED ="Advanced";
+    private static final String CUSTOM ="Custom";
 	private  JTextField tf1, tf2, tf3;
 	private JPanel jPan,jPan2,jPan3,jPan4;
 	private JCheckBox[] cb;
 	private JButton jb2, jb;
 	private JFrame jf;
 	private JLabel jl;
-	private int ileNowyMin;
-	private int ileNowyWysokosc;
-	private int ileNowySzerokosc;
+	private int newGameMinesNumber;
+	private int newGameHeight;
+	private int newGameWidth;
 
 	
-	OknoZmiany( JFrame jf ){
+	ChangeView(JFrame jf ){
 		
-		jb = new JButton("OK");
-		jb2 = new JButton("Anuluj");
+		jb = new JButton(OK);
+		jb2 = new JButton(CANCEL);
 		tf1 = new JTextField("",32);
 	    tf2 = new JTextField(32);
 	    tf3 = new JTextField(32);
@@ -46,16 +52,16 @@ public class OknoZmiany extends JFrame implements Serializable, ActionListener,I
 	    jl = new JLabel();
 	    this.jf = jf;
 	    cb = new JCheckBox[4];
-	     cb[1] = new JCheckBox("Poczatkujacy");
-		 cb[2] = new JCheckBox("Sredniozaawansowany");
-		 cb[3] = new JCheckBox("Zaawansowany");	
-		 cb[0] = new JCheckBox("Niestandardowy");
+	     cb[1] = new JCheckBox(BEGINNER);
+		 cb[2] = new JCheckBox(INTERMEDIATE);
+		 cb[3] = new JCheckBox(ADVANCED);
+		 cb[0] = new JCheckBox(CUSTOM);
 		
 	}
 
-	public void wyswietlOkno() {
+	public void showView() {
 		 
-			setTitle("OknoGlowne");
+			setTitle("MainView");
 			setVisible(true);
 			setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 			setSize(330, 250);
@@ -76,14 +82,14 @@ public class OknoZmiany extends JFrame implements Serializable, ActionListener,I
 		
 		jPan2.setLayout(new BoxLayout(jPan2,BoxLayout.Y_AXIS));					
 		jPan2.add(cb[1]);
-		jPan2.add(new JLabel("-10 min"));
-		jPan2.add(new JLabel("-Siatka 9x9 pol"));
+		jPan2.add(new JLabel("-10 mines"));
+		jPan2.add(new JLabel("-Grid 9x9"));
 		jPan2.add(cb[2]);
-		jPan2.add(new JLabel("-40 min"));
-		jPan2.add(new JLabel("-Siatka 16x16 pol"));
+		jPan2.add(new JLabel("-40 mines"));
+		jPan2.add(new JLabel("-Grid 16x16"));
 		jPan2.add(cb[3]);
-		jPan2.add(new JLabel("-99 min"));
-		jPan2.add(new JLabel("-Siatka 16x30 pol"));
+		jPan2.add(new JLabel("-99 mines"));
+		jPan2.add(new JLabel("-Grid 16x30"));
 	}
 	
 	private void ustawPanel3() {
@@ -97,19 +103,19 @@ public class OknoZmiany extends JFrame implements Serializable, ActionListener,I
 		tf3.addActionListener(new DoNiestadardowego());
 		jl.setVisible(false);
 		jPan3.add(cb[0]);
-		jPan3.add(new JLabel("Wysokosc (9-24)"));
+		jPan3.add(new JLabel("Height (9-24)"));
 		jPan3.add(tf1);
-		jPan3.add(new JLabel("Szerokość (9-30)"));
+		jPan3.add(new JLabel("Width (9-30)"));
 		jPan3.add(tf2);
-		jPan3.add(new JLabel("Miny (10-668)"));
+		jPan3.add(new JLabel("Mines (10-668)"));
 		jPan3.add(tf3);	
 		jPan3.add(jl);
 	}
 	
 private void ustawPanel4() {
 		
-		jb = new JButton("OK");
-		jb2 = new JButton("Anuluj");
+		jb = new JButton(OK);
+		jb2 = new JButton(CANCEL);
 		jb.addActionListener(this);
 		jb2.addActionListener(this);
 		jPan4.add(jb);
@@ -120,22 +126,22 @@ private void ustawPanel4() {
 public void actionPerformed(ActionEvent e) {
 	
 	if(e.getSource()==jb) {
-		if(ileNowyWysokosc>24|| ileNowyWysokosc<9 ) {
+		if(newGameHeight >24|| newGameHeight <9 ) {
 			jl.setVisible(true);
-			jl.setText("Wysoko�� z poza zakresu");
+			jl.setText("Height out of range");
 		}
-		else if(ileNowySzerokosc>30|| ileNowySzerokosc<9 ){
+		else if(newGameWidth >30|| newGameWidth <9 ){
 			jl.setVisible(true);
-			jl.setText("Szeroko�� z poza zakresu");
+			jl.setText("Width out of range");
 		}
-		else if(ileNowyMin<10|| ileNowyMin>668|| ileNowyMin>ileNowySzerokosc*ileNowyWysokosc){
+		else if(newGameMinesNumber <10|| newGameMinesNumber >668|| newGameMinesNumber > newGameWidth * newGameHeight){
 			jl.setVisible(true);
-			jl.setText("Ilo�� min z poza zakresu");
+			jl.setText("Number of mines out of range");
 		}
 		else {
-		OknoGlowne sap = new OknoGlowne(ileNowyWysokosc,ileNowySzerokosc,ileNowyMin);
-		sap.doDziela();
-		Saper.zapisz(sap);
+		MainView sap = new MainView(newGameHeight, newGameWidth, newGameMinesNumber);
+		sap.go();
+		Minesweeper.save(sap);
 		jf.setVisible(false);
 		jf =null;
 		this.dispose();
@@ -174,25 +180,25 @@ public void actionPerformed(ActionEvent e) {
 			tf1.setEditable(false);
 			tf2.setEditable(false);
 			tf3.setEditable(false);
-			ileNowyMin = 10;
-			ileNowyWysokosc =9;
-			ileNowySzerokosc = 9;
+			newGameMinesNumber = 10;
+			newGameHeight =9;
+			newGameWidth = 9;
 		}
 		if(index == 2) {
 			tf1.setEditable(false);
 			tf2.setEditable(false);
 			tf3.setEditable(false);
-			ileNowyMin = 40;
-			ileNowyWysokosc =16;
-			ileNowySzerokosc = 16;
+			newGameMinesNumber = 40;
+			newGameHeight =16;
+			newGameWidth = 16;
 		}
 		if(index == 3) {
 			tf1.setEditable(false);
 			tf2.setEditable(false);
 			tf3.setEditable(false);
-			ileNowyMin = 99;
-			ileNowyWysokosc =16;
-			ileNowySzerokosc = 30;
+			newGameMinesNumber = 99;
+			newGameHeight =16;
+			newGameWidth = 30;
 		}
 	}
 	class DoNiestadardowego implements ActionListener,Serializable{
@@ -200,9 +206,9 @@ public void actionPerformed(ActionEvent e) {
 		
 		try {
 			
-		 ileNowyWysokosc = Integer.parseInt(tf1.getText());
-			 ileNowySzerokosc = Integer.parseInt(tf2.getText());
-			 ileNowyMin = Integer.parseInt(tf3.getText());
+		 newGameHeight = Integer.parseInt(tf1.getText());
+			 newGameWidth = Integer.parseInt(tf2.getText());
+			 newGameMinesNumber = Integer.parseInt(tf3.getText());
 
 		}catch(Exception ex) {
 			ex.printStackTrace();

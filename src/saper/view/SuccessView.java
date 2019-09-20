@@ -1,6 +1,6 @@
 package saper.view;
 
-import saper.Saper;
+import saper.Minesweeper;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -13,31 +13,32 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 
-public class OknoWygrana extends JFrame implements Serializable,ActionListener {
-		
-	
-		private int czas;
+public class SuccessView extends JFrame implements Serializable,ActionListener {
+
+    private static final String CLOSE ="Close";
+    private static final String PLAY_AGAIN ="Play again";
+		private int time;
 		private JButton jb2;
 		private JButton jb1;
 		private JFrame jf;
-		private int ileMin;
-		private int kolumny;
-		private int wiersze;
+		private int minesNumber;
+		private int columns;
+		private int rows;
 		
-		OknoWygrana(OknoGlowne sap){
+		SuccessView(MainView sap){
 			
-			this.kolumny = sap.getKolumny();
-			this.wiersze = sap.getWiersze();
-			this.ileMin = sap.getIleMin();
-			this.czas = sap.getCzas();
+			this.columns = sap.getColumns();
+			this.rows = sap.getRows();
+			this.minesNumber = sap.getMinesNumber();
+			this.time = sap.getTime();
 			this.jf = sap.getJf();		
-			jb1 = new JButton("Zakoncz");
-			jb2 = new JButton("Zagraj ponownie");
+			jb1 = new JButton(CLOSE);
+			jb2 = new JButton(PLAY_AGAIN);
 		}
 
-		public void wyswietlOkno() {
+		public void showView() {
 				
-				setTitle("OknoGlowne");
+				setTitle("MainView");
 				setVisible(true);
 				setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				setSize(250, 200);
@@ -46,12 +47,12 @@ public class OknoWygrana extends JFrame implements Serializable,ActionListener {
 				JPanel jPan = new JPanel();
 				JPanel jPan2 = new JPanel();
 				JPanel jPan3 = new JPanel();
-				JLabel jl = new JLabel("Gratulacje Wygrana");
+				JLabel jl = new JLabel("Congratulations you've won");
 				jPan.add(jl);			
-				JLabel jl2 = new JLabel("czas: ");
-				JLabel jakiCzas = new JLabel(String.valueOf(czas)+"s");			
+				JLabel jl2 = new JLabel("Time: ");
+				JLabel timeLabel = new JLabel(time +"s");
 				jPan2.add(jl2);			
-				jPan2.add(jakiCzas);			
+				jPan2.add(timeLabel);
 				jPan3.add(jb1);
 				jPan3.add(jb2);				
 				jPan.add(jPan2);			
@@ -66,14 +67,14 @@ public class OknoWygrana extends JFrame implements Serializable,ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if(e.getSource() == jb1) {
-				OknoGlowne sap1 = new OknoGlowne(wiersze,kolumny,ileMin);
-				sap1.doDziela();
-				Saper.zapisz(sap1);
+				MainView sap1 = new MainView(rows, columns, minesNumber);
+				sap1.go();
+				Minesweeper.save(sap1);
 				System.exit(0);
 			}
 			
 			if(e.getSource()==jb2) {
-				new OknoGlowne(wiersze,kolumny,ileMin).doDziela();
+				new MainView(rows, columns, minesNumber).go();
 				jf.dispose();
 				this.dispose();
 			}
