@@ -10,7 +10,7 @@ import java.awt.event.ActionListener;
 import java.io.Serializable;
 
 
-public class SuccessView extends JFrame implements Serializable,ActionListener {
+public class SuccessView extends JFrame implements View {
 
     private static final String CLOSE ="Close";
     private static final String PLAY_AGAIN ="Play again";
@@ -33,6 +33,7 @@ public class SuccessView extends JFrame implements Serializable,ActionListener {
 			jb2 = new JButton(PLAY_AGAIN);
 		}
 
+		@Override
 		public void showView() {
 				
 				setTitle("MainView");

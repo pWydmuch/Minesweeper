@@ -11,24 +11,39 @@ public class Draw implements Serializable {
 	private int minesNumber;
 	private int[] x;
 	private int[] y;
-	
-//---------------------------------------------------------------------------	
-	public Draw(int minesNumber) {
+
+	public Draw(int minesNumber, int rows, int columns) {
 		
 		this.minesNumber = minesNumber;
 		generator = new Random();
 		isRepeat = false;
 		x = new int[minesNumber];
 		y = new int[minesNumber];
+		makeDraw(rows,columns);
 	}
-//------------------------------------------------------------------------------	
+
+	public int getMinesNumber() {
+		return minesNumber;
+	}
+
 	public int getX (int i) {
 		return x[i];
 	}	
 	public int getY (int i) {
 		return y[i];
 	}
-//-------------------------------------------------------------------------------------	
+
+	public boolean isSuccess(MyButton[][] jb, ImageIcon flag) {
+		int flagsNumbers = 0;
+		for (int i = 0; i < jb.length; i++) {
+			for (int j = 0; j < jb[i].length; j++) {
+				if(jb[i][j].getIcon()==flag && checkIfBomb(i, j))
+					flagsNumbers++;
+			}
+		}
+		return flagsNumbers == minesNumber && checkOthersDisabled(jb);
+	}
+
 	private void check(int i, int number1, int number2) {
 
 		if (i != 0) {
@@ -38,8 +53,8 @@ public class Draw implements Serializable {
 					return;				}}}
 	}
 
-	public void makeDraw(int ile, int rows, int columns) {
-		for (int i = 0; i < ile; i++) {
+	private void makeDraw(int rows, int columns) {
+		for (int i = 0; i < minesNumber; i++) {
 			do {
 				x[i] = generator.nextInt(rows);
 				y[i] = generator.nextInt(columns);
@@ -48,20 +63,7 @@ public class Draw implements Serializable {
 				isRepeat = false;
 			} while (true);
 			isRepeat = false; 		}}
-	
-	public boolean isSuccess(MyButton[][] jb, ImageIcon flag) {
-		int flagsNumbers = 0;
-		for (int i = 0; i < jb.length; i++) {
-			for (int j = 0; j < jb[i].length; j++) {
-				if(jb[i][j].getIcon()==flag && checkIfBomb(i, j))
-					 flagsNumbers++;
-			}
-	}
-	return flagsNumbers == minesNumber && checkOthersDisabled(jb);
-//		if(liczFlagi == minesNumber && checkOthersDisabled(jb)) return true;
-//		else return false;
-	}
-	
+
 	private boolean checkIfBomb(int a, int b) {
 		for(int i = 0; i< minesNumber; i++) {
 			if(x[i] == a && y[i]== b) return true;

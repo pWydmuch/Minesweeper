@@ -1,6 +1,6 @@
 package model;
 
-public interface Subject {
+public interface Observable {
 	
 	 void addObserver(Observer ob);
 	 void removeObserver(Observer ob);
