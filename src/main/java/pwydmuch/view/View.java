@@ -1,4 +1,4 @@
-package view;
+package pwydmuch.view;
 
 import java.awt.event.ActionListener;
 import java.io.Serializable;

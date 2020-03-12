@@ -17,7 +17,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>controller.Minesweeper</mainClass>
+                            <mainClass>pwydmuch.Minesweeper</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

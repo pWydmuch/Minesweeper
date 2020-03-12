@@ -1,4 +1,4 @@
-package model;
+package pwydmuch.model;
 
 
 import javax.swing.*;

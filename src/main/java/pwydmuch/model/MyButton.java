@@ -1,6 +1,4 @@
-package model;
-
-import view.MainView;
+package pwydmuch.model;
 
 import javax.swing.*;
 import java.awt.*;
