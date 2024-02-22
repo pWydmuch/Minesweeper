@@ -22,21 +22,20 @@ public class ChangeView extends JFrame implements View, ItemListener {
     private static final int BEGGINER_OPTION_INDEX = 1;
     private static final int INTERMEDIATE_OPTION_INDEX = 2;
     private static final int ADVANCED_OPTION_INDEX = 3;
-    private JTextField customRowsInput, customColumnsInput, customMinesInput;
-    private JPanel jPan, jPan2, jPan3, jPan4;
-    private JCheckBox[] newGameOptions;
-    private JButton concelButton, okButton;
+    private final JTextField customRowsInput, customColumnsInput, customMinesInput;
+    private final JPanel jPan,  jPan2, jPan3,  jPan4;
+    private final JCheckBox[] newGameOptions;
+    private JButton cancelButton, okButton;
     private JFrame frame;
-    private JLabel errorLabel;
+    private final JLabel errorLabel;
     private int newGameMinesNumber;
     private int newGameRows;
     private int newGameColumns;
 
 
     ChangeView(JFrame frame) {
-
         okButton = new JButton(OK);
-        concelButton = new JButton(CANCEL);
+        cancelButton = new JButton(CANCEL);
         customRowsInput = new JTextField("", 32);
         customColumnsInput = new JTextField(32);
         customMinesInput = new JTextField(32);
@@ -51,13 +50,10 @@ public class ChangeView extends JFrame implements View, ItemListener {
         newGameOptions[BEGGINER_OPTION_INDEX] = new JCheckBox(BEGINNER);
         newGameOptions[INTERMEDIATE_OPTION_INDEX] = new JCheckBox(INTERMEDIATE);
         newGameOptions[ADVANCED_OPTION_INDEX] = new JCheckBox(ADVANCED);
-
-
     }
 
     @Override
     public void showView() {
-
         setTitle("MainView");
         setVisible(true);
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -72,12 +68,12 @@ public class ChangeView extends JFrame implements View, ItemListener {
         jPan.add(jPan3, BorderLayout.CENTER);
         jPan.add(jPan4, BorderLayout.SOUTH);
         add(jPan);
-        for (JCheckBox c : newGameOptions)
+        for (JCheckBox c : newGameOptions) {
             c.addItemListener(this);
+        }
     }
 
     private void setPanel2() {
-
         jPan2.setLayout(new BoxLayout(jPan2, BoxLayout.Y_AXIS));
         jPan2.add(newGameOptions[1]);
         jPan2.add(new JLabel("-10 mines"));
@@ -91,7 +87,6 @@ public class ChangeView extends JFrame implements View, ItemListener {
     }
 
     private void setPanel3() {
-
         jPan3.setLayout(new BoxLayout(jPan3, BoxLayout.Y_AXIS));
         customRowsInput.setPreferredSize(new Dimension(10, 10));
         customRowsInput.setEditable(false);
@@ -110,18 +105,16 @@ public class ChangeView extends JFrame implements View, ItemListener {
     }
 
     private void setPanel4() {
-
         okButton = new JButton(OK);
-        concelButton = new JButton(CANCEL);
+        cancelButton = new JButton(CANCEL);
         okButton.addActionListener(this);
-        concelButton.addActionListener(this);
+        cancelButton.addActionListener(this);
         jPan4.add(okButton);
-        jPan4.add(concelButton);
+        jPan4.add(cancelButton);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
         if (e.getSource() == okButton) {
             if (newGameOptions[CUSTOM_OPTION_INDEX].isSelected()) {
                 assignCustomValues();
@@ -179,7 +172,6 @@ public class ChangeView extends JFrame implements View, ItemListener {
             customRowsInput.setEditable(true);
             customColumnsInput.setEditable(true);
             customMinesInput.setEditable(true);
-
         }
         if (optionIndex == BEGGINER_OPTION_INDEX) {
             customRowsInput.setEditable(false);

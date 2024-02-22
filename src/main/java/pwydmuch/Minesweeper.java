@@ -4,13 +4,11 @@ import pwydmuch.model.Draw;
 import pwydmuch.model.MyButton;
 import pwydmuch.view.MainView;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 
-public class Minesweeper {
+public class Minesweeper implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1161474195722226307L;
 
     public static void save(MainView sap) {
@@ -18,7 +16,7 @@ public class Minesweeper {
             try(ObjectOutputStream so1
                         = new ObjectOutputStream(new FileOutputStream("game-state.ser"))) {
                 so1.writeObject(sap);
-            }catch(Exception e) {}}));
+            }catch(Exception ignored) {}}));
 
     }
 

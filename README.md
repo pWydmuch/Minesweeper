@@ -7,6 +7,6 @@
 
 I used the Observer design pattern
 
-Application can be run using command below 
-
+Application can be run using commands below 
+`` mvn install ``
 `` mvn exec:java -Dexec.mainClass="pwydmuch.Minesweeper" ``

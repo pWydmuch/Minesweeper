@@ -113,7 +113,6 @@ public class MyButton extends JButton implements Observer, Serializable, Observa
 	@Override public void removeObserver(Observer ob) {};
 
 	public void addObservers(int row, int column , MyButton[][] jb) {
-		
 			if(row - 1 >= 0) 								addObserver(jb[row-1][column]);
 			if(column-1 >= 0) 								addObserver(jb[row][column-1]);
 			if(column+1 < jb[0].length) 					addObserver(jb[row][column+1]);

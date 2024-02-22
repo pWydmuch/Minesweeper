@@ -23,20 +23,19 @@ public class MainView implements WindowListener, View {
     private final static int BUTTON_WIDTH = 35;
     private final static int BUTTON_HEIGHT = 35;
     private Timer timer;    // SPROBUJ USTAWIC TEN WATEK JAKO DEMON
-    private JMenuItem newGame, options, closing;
     private MyButton[][] buttons;
     private Draw draw;
-    private RightMouseButton rightMouseButton;
-    private LeftMouseButton leftMouseButton;
-    private JFrame frame;
-    private JPanel jp;
-    private int columns;
-    private int rows;
-    private int minesNumber;
+    private final RightMouseButton rightMouseButton;
+    private final LeftMouseButton leftMouseButton;
+    private final JFrame frame;
+    private final JPanel jp;
+    private final int columns;
+    private final int rows;
+    private final int minesNumber;
     private int time;
     private int flagsNumber;
-    private JLabel timeLabel;
-    private JLabel minesLeftLabel;
+    private final JLabel timeLabel;
+    private final JLabel minesLeftLabel;
 
     private MainView(int rows, int columns, int minesNumber) {
         this.rows = rows;
@@ -58,11 +57,6 @@ public class MainView implements WindowListener, View {
         this(myButtons.length, myButtons[0].length, draw.getMinesNumber());
         this.draw = draw;
         this.buttons = myButtons;
-    }
-
-    public MainView(int rows, int columns, int minesNumber, Draw draw) {
-        this(rows, columns, minesNumber);
-        this.draw = draw;
     }
 
     public int getRows() {
@@ -163,13 +157,13 @@ public class MainView implements WindowListener, View {
     private void addMenuBar() {
         JMenuBar jMB = new JMenuBar();
         JMenu game = new JMenu("Game");
-        newGame = new JMenuItem("New Game");
+        JMenuItem newGame = new JMenuItem("New Game");
         game.add(newGame);
         newGame.addActionListener(this);
-        options = new JMenuItem("Options");
+        JMenuItem options = new JMenuItem("Options");
         game.add(options);
         options.addActionListener(this);
-        closing = new JMenuItem("Close");
+        JMenuItem closing = new JMenuItem("Close");
         game.add(closing);
         closing.addActionListener(this);
         jMB.add(game);
@@ -234,7 +228,6 @@ public class MainView implements WindowListener, View {
 
         @Override
         public void mouseClicked(MouseEvent e) {
-
             if (SwingUtilities.isRightMouseButton(e)) {
                 for (MyButton[] button : buttons) {
                     for (MyButton aButton : button) {
@@ -304,12 +297,10 @@ public class MainView implements WindowListener, View {
                     timesTimerTurnedOn++;
                 }
                 for (int j = 0; j < minesNumber; j++) {
-
                     if (e.getSource() == buttons[draw.getX(j)][draw.getY(j)]) {
                         for (int i = 0; i < minesNumber; i++) {
                             buttons[draw.getX(i)][draw.getY(i)].setIcon(bomb);
                             buttons[draw.getX(i)][draw.getY(i)].setBackground(Color.RED);
-
                         }
                         new FailureView(MainView.this).showView();
                         return;
@@ -325,14 +316,13 @@ public class MainView implements WindowListener, View {
                                 aButton.removeMouseListener(rightMouseButton);
                                 aButton.removeMouseListener(leftMouseButton);
                                 aButton.notifyObservers();
-                                return;
                             } else {
                                 aButton.setEnabled(false);
                                 aButton.setIconOfMines();
                                 aButton.removeMouseListener(leftMouseButton);
                                 aButton.removeMouseListener(rightMouseButton);
-                                return;
                             }
+                            return;
                         }
                     }
                 }
@@ -350,12 +340,10 @@ public class MainView implements WindowListener, View {
         @Override
         public void mouseExited(MouseEvent e) {
         }
-
         @Override
+
         public void mousePressed(MouseEvent e) {
         }
-
     }
-
 }
 

@@ -10,21 +10,19 @@ import java.awt.event.ActionEvent;
 
 
 public class SuccessView extends JFrame implements View {
-
     private static final String CLOSE = "Close";
     private static final String PLAY_AGAIN = "Play again";
     private static final int FRAME_WIDTH = 250;
     private static final int FRAME_HEIGHT = 200;
-    private int time;
-    private JButton closeButton;
-    private JButton playAgainButton;
-    private JFrame frame;
-    private int minesNumber;
-    private int columns;
-    private int rows;
+    private final int time;
+    private final JButton closeButton;
+    private final JButton playAgainButton;
+    private final JFrame frame;
+    private final int minesNumber;
+    private final int columns;
+    private final int rows;
 
     SuccessView(MainView mainView) {
-
         this.columns = mainView.getColumns();
         this.rows = mainView.getRows();
         this.minesNumber = mainView.getMinesNumber();
@@ -36,7 +34,6 @@ public class SuccessView extends JFrame implements View {
 
     @Override
     public void showView() {
-
         setTitle("MainView");
         setVisible(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -8,17 +8,14 @@ import java.awt.event.ActionEvent;
 
 public class FailureView extends JFrame implements View {
 
-    private static final String CLOSE ="Close";
-    private static final String PLAY_AGAIN ="Play again";
-    private static final String BEGINNER ="Beginner";
-	private int columns;
-	private int minesNumber;
-	private int rows;
-	private Draw draw;
-	private JButton playNewGameButton;
-	private JButton playSameGameButton;
-	private JButton closeButton;
-	private JFrame frame;
+    private final int columns;
+	private final int minesNumber;
+	private final int rows;
+	private final Draw draw;
+	private final JButton playNewGameButton;
+	private final JButton playSameGameButton;
+	private final JButton closeButton;
+	private final JFrame frame;
 	
 	
 	FailureView(MainView mainView){
@@ -34,7 +31,6 @@ public class FailureView extends JFrame implements View {
 
 	@Override
 	public void showView() {
-			
 			setTitle("MainView");
 			setVisible(true);
 			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -59,12 +55,10 @@ public class FailureView extends JFrame implements View {
 			jPan2.add(playNewGameButton);
 			
 			jPan.add(jPan2);
-		
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-
 		if(e.getSource() == closeButton) System.exit(0);
 
 		MyButton[][] myButtons = new MyButton[rows][columns];
@@ -79,5 +73,4 @@ public class FailureView extends JFrame implements View {
 		frame.dispose();
 		this.dispose();
 	}
-
 }

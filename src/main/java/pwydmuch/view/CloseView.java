@@ -10,14 +10,14 @@ public class CloseView extends JFrame implements View {
     private static final String SAVE = "Save";
     private static final String DONT_SAVE = "Don't save";
     private static final String CANCEL = "Cancel";
-    private int columns;
-    private int frameX;
-    private int frameY;
-    private int frameHeight;
-    private JButton saveButton;
-    private JButton dontSaveButton;
-    private JButton concellButton;
-    private MainView mainView;
+    private final int columns;
+    private final int frameX;
+    private final int frameY;
+    private final int frameHeight;
+    private final JButton saveButton;
+    private final JButton dontSaveButton;
+    private final JButton concellButton;
+    private final MainView mainView;
 
     CloseView(MainView mainView) {
         this.columns = mainView.getColumns();
@@ -32,7 +32,6 @@ public class CloseView extends JFrame implements View {
 
     @Override
     public void showView() {
-
         setTitle("MainView");
         setVisible(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -68,7 +67,6 @@ public class CloseView extends JFrame implements View {
             System.exit(0);
         }
         this.dispose();
-
     }
 
 }
