@@ -3,9 +3,9 @@ package pwydmuch.model;
 import javax.swing.*;
 import java.awt.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.IntBinaryOperator;
 
 public class MyButton extends JButton implements Observer, Serializable, Observable {
 
@@ -20,7 +20,7 @@ public class MyButton extends JButton implements Observer, Serializable, Observa
     public static ImageIcon flag;
     public static ImageIcon bomb;
     public static ImageIcon hourglass;
-    private final ArrayList<Observer> observers;
+    private final Set<Observer> observers;
 
     static {
         map = new HashMap<>();
@@ -29,7 +29,7 @@ public class MyButton extends JButton implements Observer, Serializable, Observa
     }
 
     public MyButton() {
-        observers = new ArrayList<>();
+        observers = new HashSet<>();
     }
 
     private static void loadImages() {
@@ -75,11 +75,21 @@ public class MyButton extends JButton implements Observer, Serializable, Observa
         clicksNumber++;
     }
 
-    public void countMinesAround(int row, int column, Draw draw, MyButton[][] myButtons) {
+    public void countMinesAround(int row, int column, Draw draw, MyButton[][] gameBoard) {
+        BiConsumer<Integer, Integer> countBombs = (Integer r, Integer c) -> minesAroundNumber += draw.checkIfBomb(r, c) ? 1 : 0;
+        browseBoard(row, column, gameBoard, countBombs);
+    }
+
+    public void addObservers(int row, int column, MyButton[][] gameBoard) {
+        BiConsumer<Integer, Integer> addObservers = (Integer r, Integer c) -> addObserver(gameBoard[r][c]);
+        browseBoard(row, column, gameBoard, addObservers);
+    }
+
+    private void browseBoard(int row, int column, MyButton[][] gameBoard, BiConsumer<Integer, Integer> fun) {
         for (int r = row - 1; r <= row + 1; r++) {
             for (int c = column - 1; c <= column + 1; c++) {
-                if (r >= 0 && c >= 0 && c < myButtons[0].length && r < myButtons.length) {
-                    minesAroundNumber += draw.checkIfBomb(r, c) ? 1 : 0;
+                if (r >= 0 && c >= 0 && c < gameBoard[0].length && r < gameBoard.length) {
+                    fun.accept(r, c);
                 }
             }
         }
@@ -92,25 +102,9 @@ public class MyButton extends JButton implements Observer, Serializable, Observa
 
     @Override
     public void notifyObservers() {
-        for (Observer observer : observers) {
-            observer.update();
-        }
+        observers.forEach(Observer::update);
     }
 
-    @Override
-    public void removeObserver(Observer ob) {
-    }
-
-    public void addObservers(int row, int column, MyButton[][] jb) {
-        if (row - 1 >= 0) addObserver(jb[row - 1][column]);
-        if (column - 1 >= 0) addObserver(jb[row][column - 1]);
-        if (column + 1 < jb[0].length) addObserver(jb[row][column + 1]);
-        if (row + 1 < jb.length) addObserver(jb[row + 1][column]);
-        if (row - 1 >= 0 && column - 1 >= 0) addObserver(jb[row - 1][column - 1]);
-        if (row - 1 >= 0 && column + 1 < jb[0].length) addObserver(jb[row - 1][column + 1]);
-        if (row + 1 < jb.length && column - 1 >= 0) addObserver(jb[row + 1][column - 1]);
-        if (row + 1 < jb.length && column + 1 < jb[0].length) addObserver(jb[row + 1][column + 1]);
-    }
 
     @Override
     public void update() {
