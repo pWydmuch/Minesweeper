@@ -115,7 +115,7 @@ public class MainView implements WindowListener, View {
         for (int i = 0; i < buttons.length; i++) {
             for (int j = 0; j < buttons[i].length; j++) {
                 buttons[i][j].addObservers(i, j, buttons);
-                buttons[i][j].countMinesAround(i, j, minesNumber, draw, buttons);
+                buttons[i][j].countMinesAround(i, j, draw, buttons);
             }
         }
     }

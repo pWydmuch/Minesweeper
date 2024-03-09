@@ -9,15 +9,15 @@ public class Draw implements Serializable {
     private final Random generator;
     private boolean isRepeat;
     private final int minesNumber;
-    private final int[] x;
-    private final int[] y;
+    private final int[] xMinesCoordinates;
+    private final int[] yMinesCoordinates;
 
     public Draw(int minesNumber, int rows, int columns) {
         this.minesNumber = minesNumber;
         generator = new Random();
         isRepeat = false;
-        x = new int[minesNumber];
-        y = new int[minesNumber];
+        xMinesCoordinates = new int[minesNumber];
+        yMinesCoordinates = new int[minesNumber];
         makeDraw(rows, columns);
     }
 
@@ -26,11 +26,11 @@ public class Draw implements Serializable {
     }
 
     public int getX(int i) {
-        return x[i];
+        return xMinesCoordinates[i];
     }
 
     public int getY(int i) {
-        return y[i];
+        return yMinesCoordinates[i];
     }
 
     public boolean isSuccess(MyButton[][] jb, ImageIcon flag) {
@@ -47,7 +47,7 @@ public class Draw implements Serializable {
     private void check(int i, int number1, int number2) {
         if (i != 0) {
             for (int j = 0; j < i; j++) {
-                if (x[j] == number1 && y[j] == number2) {
+                if (xMinesCoordinates[j] == number1 && yMinesCoordinates[j] == number2) {
                     isRepeat = true;
                     return;
                 }
@@ -58,18 +58,18 @@ public class Draw implements Serializable {
     private void makeDraw(int rows, int columns) {
         for (int i = 0; i < minesNumber; i++) {
             do {
-                x[i] = generator.nextInt(rows);
-                y[i] = generator.nextInt(columns);
-                check(i, x[i], y[i]);
+                xMinesCoordinates[i] = generator.nextInt(rows);
+                yMinesCoordinates[i] = generator.nextInt(columns);
+                check(i, xMinesCoordinates[i], yMinesCoordinates[i]);
                 if (!isRepeat) break;
                 isRepeat = false;
             } while (true);
         }
     }
 
-    private boolean checkIfBomb(int a, int b) {
+    boolean checkIfBomb(int a, int b) {
         for (int i = 0; i < minesNumber; i++) {
-            if (x[i] == a && y[i] == b) return true;
+            if (xMinesCoordinates[i] == a && yMinesCoordinates[i] == b) return true;
         }
         return false;
     }

@@ -5,6 +5,8 @@ import pwydmuch.model.MyButton;
 import pwydmuch.view.MainView;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class Minesweeper implements Serializable {
 
@@ -14,7 +16,7 @@ public class Minesweeper implements Serializable {
     public static void save(MainView sap) {
         Runtime.getRuntime().addShutdownHook(new Thread(()-> {
             try(ObjectOutputStream so1
-                        = new ObjectOutputStream(new FileOutputStream("game-state.ser"))) {
+                        = new ObjectOutputStream(Files.newOutputStream(Path.of("game-state.ser")))) {
                 so1.writeObject(sap);
             }catch(Exception ignored) {}}));
 
@@ -22,7 +24,7 @@ public class Minesweeper implements Serializable {
 
     public static void main(String[] args) {
         try(ObjectInputStream so =
-                    new ObjectInputStream(new FileInputStream("game-state.ser"))) {
+                    new ObjectInputStream(Files.newInputStream(Path.of("game-state.ser")))) {
             MainView sap = (MainView) so.readObject();
             sap.getFrame().setVisible(true);
         }catch(Exception e) {
