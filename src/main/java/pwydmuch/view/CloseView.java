@@ -16,7 +16,7 @@ public class CloseView extends JFrame implements View {
     private final int frameHeight;
     private final JButton saveButton;
     private final JButton dontSaveButton;
-    private final JButton concellButton;
+    private final JButton cancelButton;
     private final MainView mainView;
 
     CloseView(MainView mainView) {
@@ -27,7 +27,7 @@ public class CloseView extends JFrame implements View {
         this.mainView = mainView;
         saveButton = new JButton(SAVE);
         dontSaveButton = new JButton(DONT_SAVE);
-        concellButton = new JButton(CANCEL);
+        cancelButton = new JButton(CANCEL);
     }
 
     @Override
@@ -37,20 +37,20 @@ public class CloseView extends JFrame implements View {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(columns * 35 + 70, 200);
         setLocation(frameX, frameY + frameHeight / 4);
-        JPanel jPan = new JPanel();
-        JPanel jPan2 = new JPanel();
-        JPanel jPan3 = new JPanel();
+        var jPan = new JPanel();
+        var jPan2 = new JPanel();
+        var jPan3 = new JPanel();
         jPan.setLayout(new BoxLayout(jPan, BoxLayout.Y_AXIS));
         add(jPan);
-        JLabel questionLabel = new JLabel("What do you want to do?");
+        var questionLabel = new JLabel("What do you want to do?");
         jPan3.add(questionLabel);
         jPan.add(jPan3);
         saveButton.addActionListener(this);
         dontSaveButton.addActionListener(this);
-        concellButton.addActionListener(this);
+        cancelButton.addActionListener(this);
         jPan2.add(saveButton);
         jPan2.add(dontSaveButton);
-        jPan2.add(concellButton);
+        jPan2.add(cancelButton);
         jPan.add(jPan2);
     }
 

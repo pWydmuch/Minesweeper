@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.stream.IntStream;
 
 
 public class ChangeView extends JFrame implements View, ItemListener {
@@ -19,11 +20,11 @@ public class ChangeView extends JFrame implements View, ItemListener {
     private static final String ADVANCED = "Advanced";
     private static final String CUSTOM = "Custom";
     private static final int CUSTOM_OPTION_INDEX = 0;
-    private static final int BEGGINER_OPTION_INDEX = 1;
+    private static final int BEGINNER_OPTION_INDEX = 1;
     private static final int INTERMEDIATE_OPTION_INDEX = 2;
     private static final int ADVANCED_OPTION_INDEX = 3;
     private final JTextField customRowsInput, customColumnsInput, customMinesInput;
-    private final JPanel jPan,  jPan2, jPan3,  jPan4;
+    private final JPanel jPan, jPan2, jPan3, jPan4;
     private final JCheckBox[] newGameOptions;
     private JButton cancelButton, okButton;
     private JFrame frame;
@@ -47,7 +48,7 @@ public class ChangeView extends JFrame implements View, ItemListener {
         this.frame = frame;
         newGameOptions = new JCheckBox[4];
         newGameOptions[CUSTOM_OPTION_INDEX] = new JCheckBox(CUSTOM);
-        newGameOptions[BEGGINER_OPTION_INDEX] = new JCheckBox(BEGINNER);
+        newGameOptions[BEGINNER_OPTION_INDEX] = new JCheckBox(BEGINNER);
         newGameOptions[INTERMEDIATE_OPTION_INDEX] = new JCheckBox(INTERMEDIATE);
         newGameOptions[ADVANCED_OPTION_INDEX] = new JCheckBox(ADVANCED);
     }
@@ -68,7 +69,7 @@ public class ChangeView extends JFrame implements View, ItemListener {
         jPan.add(jPan3, BorderLayout.CENTER);
         jPan.add(jPan4, BorderLayout.SOUTH);
         add(jPan);
-        for (JCheckBox c : newGameOptions) {
+        for (var c : newGameOptions) {
             c.addItemListener(this);
         }
     }
@@ -89,9 +90,7 @@ public class ChangeView extends JFrame implements View, ItemListener {
     private void setPanel3() {
         jPan3.setLayout(new BoxLayout(jPan3, BoxLayout.Y_AXIS));
         customRowsInput.setPreferredSize(new Dimension(10, 10));
-        customRowsInput.setEditable(false);
-        customColumnsInput.setEditable(false);
-        customMinesInput.setEditable(false);
+        setEditableInputsTo(false);
         customRowsInput.setFocusable(true);
         errorLabel.setVisible(false);
         jPan3.add(newGameOptions[0]);
@@ -117,19 +116,7 @@ public class ChangeView extends JFrame implements View, ItemListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == okButton) {
             if (newGameOptions[CUSTOM_OPTION_INDEX].isSelected()) {
-                assignCustomValues();
-                if (newGameRows > 24 || newGameRows < 9) {
-                    errorLabel.setVisible(true);
-                    System.out.println(newGameRows);
-                    System.out.println(customRowsInput.getText());
-                    errorLabel.setText("Rows out of range");
-                } else if (newGameColumns > 30 || newGameColumns < 9) {
-                    errorLabel.setVisible(true);
-                    errorLabel.setText("Columns out of range");
-                } else if (newGameMinesNumber < 10 || newGameMinesNumber > 668 || newGameMinesNumber > newGameColumns * newGameRows) {
-                    errorLabel.setVisible(true);
-                    errorLabel.setText("Number of mines out of range");
-                } else startNewGame();
+                runWithCustomOptions();
             } else {
                 startNewGame();
             }
@@ -137,10 +124,36 @@ public class ChangeView extends JFrame implements View, ItemListener {
             this.dispose();
     }
 
-    private void startNewGame(){
-        MyButton[][] myButtons = new MyButton[newGameRows][newGameColumns];
-        Draw draw = new Draw(newGameMinesNumber, newGameRows, newGameColumns);
-        MainView mainView = new MainView(myButtons, draw);
+    private void runWithCustomOptions() {
+        if (assignCustomValues()) {
+            checkIfInputsInRange();
+        } else {
+            errorLabel.setVisible(true);
+            errorLabel.setText("You must provide a valid value");
+        }
+    }
+
+    private void checkIfInputsInRange() {
+        if (newGameRows > 24 || newGameRows < 9) {
+            errorLabel.setVisible(true);
+            errorLabel.setText("Rows out of range");
+        } else if (newGameColumns > 30 || newGameColumns < 9) {
+            errorLabel.setVisible(true);
+            errorLabel.setText("Columns out of range");
+        } else if (isNumberOfMinesCorrect()) {
+            errorLabel.setVisible(true);
+            errorLabel.setText("Number of mines out of range");
+        } else startNewGame();
+    }
+
+    private boolean isNumberOfMinesCorrect() {
+        return newGameMinesNumber < 10 || newGameMinesNumber > 668 || newGameMinesNumber > newGameColumns * newGameRows;
+    }
+
+    private void startNewGame() {
+        var myButtons = new MyButton[newGameRows][newGameColumns];
+        var draw = new Draw(newGameMinesNumber, newGameRows, newGameColumns);
+        var mainView = new MainView(myButtons, draw);
         mainView.go();
 //                pwydmuch.Minesweeper.save(sap);
         frame.setVisible(false);
@@ -151,7 +164,7 @@ public class ChangeView extends JFrame implements View, ItemListener {
     @Override
     public void itemStateChanged(ItemEvent e) {
         if (e.getStateChange() == ItemEvent.SELECTED)
-            for (int i = 0; i < newGameOptions.length; i++)
+            for (var i = 0; i < newGameOptions.length; i++)
                 if (e.getSource() == newGameOptions[i]) {
                     unselectOthersOptions(i);
                     selectOption(i);
@@ -160,52 +173,50 @@ public class ChangeView extends JFrame implements View, ItemListener {
     }
 
     private void unselectOthersOptions(int optionIndex) {
-        for (int i = 0; i < newGameOptions.length; i++) {
-            if (i == optionIndex) continue;
-            newGameOptions[i].setSelected(false);
-        }
+        IntStream.range(0, newGameOptions.length)
+                .filter(i -> i != optionIndex)
+                .forEach(i -> newGameOptions[i].setSelected(false));
     }
 
     private void selectOption(int optionIndex) {
         if (optionIndex == CUSTOM_OPTION_INDEX) {
             customRowsInput.setFocusable(true);
-            customRowsInput.setEditable(true);
-            customColumnsInput.setEditable(true);
-            customMinesInput.setEditable(true);
+            setEditableInputsTo(true);
         }
-        if (optionIndex == BEGGINER_OPTION_INDEX) {
-            customRowsInput.setEditable(false);
-            customColumnsInput.setEditable(false);
-            customMinesInput.setEditable(false);
+        if (optionIndex == BEGINNER_OPTION_INDEX) {
+            setEditableInputsTo(false);
             newGameMinesNumber = 10;
             newGameRows = 9;
             newGameColumns = 9;
         }
         if (optionIndex == INTERMEDIATE_OPTION_INDEX) {
-            customRowsInput.setEditable(false);
-            customColumnsInput.setEditable(false);
-            customMinesInput.setEditable(false);
+            setEditableInputsTo(false);
             newGameMinesNumber = 40;
             newGameRows = 16;
             newGameColumns = 16;
         }
         if (optionIndex == ADVANCED_OPTION_INDEX) {
-            customRowsInput.setEditable(false);
-            customColumnsInput.setEditable(false);
-            customMinesInput.setEditable(false);
+            setEditableInputsTo(false);
             newGameMinesNumber = 99;
             newGameRows = 16;
             newGameColumns = 30;
         }
     }
 
-    public void assignCustomValues() {
+    private void setEditableInputsTo(boolean option) {
+        customRowsInput.setEditable(option);
+        customColumnsInput.setEditable(option);
+        customMinesInput.setEditable(option);
+    }
+
+    public boolean assignCustomValues() {
         try {
             newGameRows = Integer.parseInt(customRowsInput.getText());
             newGameColumns = Integer.parseInt(customColumnsInput.getText());
             newGameMinesNumber = Integer.parseInt(customMinesInput.getText());
-        } catch (Exception ex) {
-            ex.printStackTrace();
+            return true;
+        } catch (NumberFormatException ex) {
+            return false;
         }
     }
 

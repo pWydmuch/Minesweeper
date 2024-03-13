@@ -40,13 +40,13 @@ public class SuccessView extends JFrame implements View {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setLocation(frame.getX(), frame.getY() + frame.getHeight() / 4);
 
-        JPanel jPan = new JPanel();
-        JPanel jPan2 = new JPanel();
-        JPanel jPan3 = new JPanel();
-        JLabel congratulationLabel = new JLabel("Congratulations you've won");
+        var jPan = new JPanel();
+        var jPan2 = new JPanel();
+        var jPan3 = new JPanel();
+        var congratulationLabel = new JLabel("Congratulations you've won");
         jPan.add(congratulationLabel);
-        JLabel timeTextLabel = new JLabel("Time: ");
-        JLabel timeLabel = new JLabel(time + "s");
+        var timeTextLabel = new JLabel("Time: ");
+        var timeLabel = new JLabel(time + "s");
         jPan2.add(timeTextLabel);
         jPan2.add(timeLabel);
         jPan3.add(playAgainButton);
@@ -63,9 +63,9 @@ public class SuccessView extends JFrame implements View {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == playAgainButton) {
 
-            MyButton[][] myButtons = new MyButton[rows][columns];
-            Draw newDraw = new Draw(minesNumber,rows,columns);
-            MainView mainView = new MainView(myButtons,newDraw);
+            var myButtons = new MyButton[rows][columns];
+            var newDraw = new Draw(minesNumber, rows, columns);
+            var mainView = new MainView(myButtons, newDraw);
             mainView.go();
 //            pwydmuch.Minesweeper.save(mainView);
             System.exit(0);

@@ -3,86 +3,62 @@ package pwydmuch.model;
 
 import javax.swing.*;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 public class Draw implements Serializable {
-    private final Random generator;
-    private boolean isRepeat;
+    private static final Random GENERATOR = new Random();
     private final int minesNumber;
-    private final int[] xMinesCoordinates;
-    private final int[] yMinesCoordinates;
+    private final Set<Point> minePoints;
 
     public Draw(int minesNumber, int rows, int columns) {
+        this.minePoints = HashSet.newHashSet(minesNumber);
         this.minesNumber = minesNumber;
-        generator = new Random();
-        isRepeat = false;
-        xMinesCoordinates = new int[minesNumber];
-        yMinesCoordinates = new int[minesNumber];
-        makeDraw(rows, columns);
+        makeDraw(rows, columns, minesNumber);
+    }
+
+    public Set<Point> getMinePoints() {
+        return minePoints;
     }
 
     public int getMinesNumber() {
         return minesNumber;
     }
 
-    public int getX(int i) {
-        return xMinesCoordinates[i];
-    }
-
-    public int getY(int i) {
-        return yMinesCoordinates[i];
-    }
-
     public boolean isSuccess(MyButton[][] jb, ImageIcon flag) {
-        int flagsNumbers = 0;
-        for (int i = 0; i < jb.length; i++) {
-            for (int j = 0; j < jb[i].length; j++) {
-                if (jb[i][j].getIcon() == flag && checkIfBomb(i, j))
+        var flagsNumbers = 0;
+        for (var i = 0; i < jb.length; i++) {
+            for (var j = 0; j < jb[i].length; j++) {
+                if (jb[i][j].getIcon() == flag && checkIfMine(i, j))
                     flagsNumbers++;
             }
         }
         return flagsNumbers == minesNumber && checkOthersDisabled(jb);
     }
 
-    private void check(int i, int number1, int number2) {
-        if (i != 0) {
-            for (int j = 0; j < i; j++) {
-                if (xMinesCoordinates[j] == number1 && yMinesCoordinates[j] == number2) {
-                    isRepeat = true;
-                    return;
-                }
-            }
+    private void makeDraw(int rows, int columns, int minesNumber) {
+        while (minePoints.size() != minesNumber) {
+            var xMineCoordinate = GENERATOR.nextInt(rows);
+            var yMineCoordinate = GENERATOR.nextInt(columns);
+            var point = new Point(xMineCoordinate, yMineCoordinate);
+            minePoints.add(point);
         }
-    }
-
-    private void makeDraw(int rows, int columns) {
-        for (int i = 0; i < minesNumber; i++) {
-            do {
-                xMinesCoordinates[i] = generator.nextInt(rows);
-                yMinesCoordinates[i] = generator.nextInt(columns);
-                check(i, xMinesCoordinates[i], yMinesCoordinates[i]);
-                if (!isRepeat) break;
-                isRepeat = false;
-            } while (true);
-        }
-    }
-
-    boolean checkIfBomb(int a, int b) {
-        for (int i = 0; i < minesNumber; i++) {
-            if (xMinesCoordinates[i] == a && yMinesCoordinates[i] == b) return true;
-        }
-        return false;
     }
 
     private boolean checkOthersDisabled(MyButton[][] jb) {
-        for (int i = 0; i < jb.length; i++) {
-            for (int j = 0; j < jb[i].length; j++) {
-                if (!checkIfBomb(i, j) && jb[i][j].isEnabled()) {
+        for (var i = 0; i < jb.length; i++) {
+            for (var j = 0; j < jb[i].length; j++) {
+                if (!checkIfMine(i, j) && jb[i][j].isEnabled()) {
                     return false;
                 }
             }
         }
         return true;
+    }
+
+    boolean checkIfMine(int x, int y) {
+        return minePoints.contains(new Point(x, y));
     }
 }
 

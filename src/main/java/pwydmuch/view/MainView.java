@@ -8,10 +8,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.Serializable;
 
-import static pwydmuch.model.MyButton.bomb;
-import static pwydmuch.model.MyButton.hourglass;
-import static pwydmuch.model.MyButton.flag;
-import static pwydmuch.model.MyButton.questionMark;
+import static pwydmuch.view.ImageLoader.*;
 
 
 public class MainView implements WindowListener, View {
@@ -91,29 +88,24 @@ public class MainView implements WindowListener, View {
     }
 
     private void setButtons() {
-        var x = 0;
-        var y = 0;
         jp.setLayout(new GridBagLayout());
         var gc = new GridBagConstraints();
-        for (int i = 0; i < gameBoard.length; i++) {
-            for (int j = 0; j < gameBoard[i].length; j++) {
+        for (var i = 0; i < gameBoard.length; i++) {
+            for (var j = 0; j < gameBoard[i].length; j++) {
                 gameBoard[i][j] = new MyButton();
                 gameBoard[i][j].setPreferredSize(new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT));
                 gameBoard[i][j].addMouseListener(rightMouseButton);
                 gameBoard[i][j].addMouseListener(leftMouseButton);
-                gc.gridx = x;
-                gc.gridy = y;
+                gc.gridx = j;
+                gc.gridy = i;
                 jp.add(gameBoard[i][j], gc);
-                x++;
             }
-            x = 0;
-            y++;
         }
     }
 
     private void addButtonsFeatures() {
-        for (int i = 0; i < gameBoard.length; i++) {
-            for (int j = 0; j < gameBoard[i].length; j++) {
+        for (var i = 0; i < gameBoard.length; i++) {
+            for (var j = 0; j < gameBoard[i].length; j++) {
                 gameBoard[i][j].addObservers(i, j, gameBoard);
                 gameBoard[i][j].countMinesAround(i, j, draw, gameBoard);
             }
@@ -127,18 +119,15 @@ public class MainView implements WindowListener, View {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.addWindowListener(this);
         frame.setSize(columns * BUTTON_WIDTH + 70, rows * BUTTON_HEIGHT + 150);
-//		frame.setIconImage(new ImageIcon(IMAGES_PATH +"bomb.png")
-//				.getImage()
-//				.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_SMOOTH));
         addMenuBar();
         var panel = new JPanel();
         var panel2 = new JPanel();
         var panel3 = new JPanel();
         panel.setLayout(new BorderLayout());
-        var hourglassIconButton = getButton(hourglass);
+        var hourglassIconButton = createFieldWithImage(hourglass);
         panel2.add(hourglassIconButton);
         panel2.add(timeLabel);
-        var bombIconButton = getButton(bomb);
+        var bombIconButton = createFieldWithImage(bomb);
         panel3.add(minesLeftLabel);
         panel3.add(bombIconButton);
         panel.add(panel2, BorderLayout.WEST);
@@ -146,7 +135,7 @@ public class MainView implements WindowListener, View {
         frame.add(panel, BorderLayout.SOUTH);
     }
 
-    private static JButton getButton(ImageIcon imageIcon) {
+    private static JButton createFieldWithImage(ImageIcon imageIcon) {
         var button = new JButton();
         button.setPreferredSize(new Dimension(BUTTON_WIDTH + 5, BUTTON_HEIGHT + 5));
         button.setIcon(imageIcon);
@@ -172,12 +161,6 @@ public class MainView implements WindowListener, View {
         frame.add(jp);
     }
 
-//    public void setActionListener(ActionListener actionListener) {
-//        newGame.addActionListener(actionListener);
-//        options.addActionListener(actionListener);
-//        closing.addActionListener(actionListener);
-//    }
-
     @Override
     public void actionPerformed(ActionEvent e) {
         var i = (JMenuItem) e.getSource();
@@ -187,8 +170,8 @@ public class MainView implements WindowListener, View {
 
         if (i.getText().equals("New Game")) {
             var myButtons = new MyButton[rows][columns];
-            var draw = new Draw(minesNumber,rows, columns);
-            new MainView(myButtons,draw).go();
+            var draw = new Draw(minesNumber, rows, columns);
+            new MainView(myButtons, draw).go();
             frame.dispose();
         }
         if (i.getText().equals("Close"))
@@ -297,33 +280,24 @@ public class MainView implements WindowListener, View {
                     timer.start();
                     timesTimerTurnedOn++;
                 }
-                for (int j = 0; j < minesNumber; j++) {
-                    if (e.getSource() == gameBoard[draw.getX(j)][draw.getY(j)]) {
-                        for (int i = 0; i < minesNumber; i++) {
-                            gameBoard[draw.getX(i)][draw.getY(i)].setIcon(bomb);
-                            gameBoard[draw.getX(i)][draw.getY(i)].setBackground(Color.RED);
-                        }
-                        new FailureView(MainView.this).showView();
-                        return;
-                    }
-                }
-
-                for (MyButton[] button : gameBoard) {
-                    for (MyButton aButton : button) {
-                        if (e.getSource() == aButton) {
-                            if (aButton.getMinesAroundNumber() == 0) {
-                                aButton.setIcon(null);
-                                aButton.setEnabled(false);
-                                aButton.removeMouseListener(rightMouseButton);
-                                aButton.removeMouseListener(leftMouseButton);
-                                aButton.notifyObservers();
-                            } else {
-                                aButton.setEnabled(false);
-                                aButton.setIconOfMines();
+                var minePoints = draw.getMinePoints();
+                var isMineHit = minePoints.stream()
+                        .anyMatch(p -> e.getSource() == gameBoard[p.x()][p.y()]);
+                if (isMineHit) {
+                    minePoints.forEach(p -> {
+                        gameBoard[p.x()][p.y()].setIcon(bomb);
+                        gameBoard[p.x()][p.y()].setBackground(Color.RED);
+                    });
+                    new FailureView(MainView.this).showView();
+                } else {
+                    for (MyButton[] button : gameBoard) {
+                        for (MyButton aButton : button) {
+                            if (e.getSource() == aButton) {
                                 aButton.removeMouseListener(leftMouseButton);
                                 aButton.removeMouseListener(rightMouseButton);
+                                aButton.update();
+                                return;
                             }
-                            return;
                         }
                     }
                 }
@@ -341,6 +315,7 @@ public class MainView implements WindowListener, View {
         @Override
         public void mouseExited(MouseEvent e) {
         }
+
         @Override
 
         public void mousePressed(MouseEvent e) {
