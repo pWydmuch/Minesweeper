@@ -317,7 +317,6 @@ public class MainView implements WindowListener, View {
         }
 
         @Override
-
         public void mousePressed(MouseEvent e) {
         }
     }
