@@ -2,3 +2,4 @@ target
 .idea
 *.iml
 game-state.ser
+minesweeper.db
