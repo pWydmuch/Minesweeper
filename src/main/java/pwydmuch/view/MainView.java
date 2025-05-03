@@ -187,8 +187,8 @@ public class MainView implements WindowListener, View {
 
         if (i.getText().equals("New Game")) {
             var myButtons = new MyButton[rows][columns];
-            var draw = new Draw(minesNumber,rows, columns);
-            new MainView(myButtons,draw).go();
+            var draw = new Draw(minesNumber, rows, columns);
+            new MainView(myButtons, draw).go();
             frame.dispose();
         }
         if (i.getText().equals("Close"))
@@ -341,8 +341,8 @@ public class MainView implements WindowListener, View {
         @Override
         public void mouseExited(MouseEvent e) {
         }
-        @Override
 
+        @Override
         public void mousePressed(MouseEvent e) {
         }
     }
