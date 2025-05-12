@@ -13,10 +13,6 @@ import static pwydmuch.view.ImageLoader.*;
 
 public class MainView implements WindowListener, View {
 
-    private final static int NUMBER_OF_BUTTON_STATES = 3;
-    private final static int EMPTY_STATE = 0;
-    private final static int FLAG_STATE = 1;
-    private final static int QUESTION_STATE = 2;
     private final static int BUTTON_WIDTH = 35;
     private final static int BUTTON_HEIGHT = 35;
     private Timer timer;    // SPROBUJ USTAWIC TEN WATEK JAKO DEMON
@@ -216,24 +212,26 @@ public class MainView implements WindowListener, View {
                 for (var button : gameBoard) {
                     for (var aButton : button) {
                         if (e.getSource() == aButton) {
-                            aButton.incrementClickNumber();
-                            if (aButton.getClicksNumber() % NUMBER_OF_BUTTON_STATES == FLAG_STATE) {
-                                aButton.setIcon(flag);
-                                flagsNumber--;
-                                minesLeftLabel.setText(String.valueOf(flagsNumber));
-                                aButton.removeMouseListener(leftMouseButton);
-                                return;
-                            }
-                            if (aButton.getClicksNumber() % NUMBER_OF_BUTTON_STATES == QUESTION_STATE) {
-                                aButton.setIcon(questionMark);
-                                flagsNumber++;
-                                minesLeftLabel.setText(String.valueOf(flagsNumber));
-                                aButton.addMouseListener(leftMouseButton);
-                                return;
-                            }
-                            if (aButton.getClicksNumber() % NUMBER_OF_BUTTON_STATES == EMPTY_STATE) {
-                                aButton.setIcon(null);
-                                return;
+                            aButton.changeState();
+                            switch (aButton.getState()) {
+                                case FLAG -> {
+                                    aButton.setIcon(flag);
+                                    flagsNumber--;
+                                    minesLeftLabel.setText(String.valueOf(flagsNumber));
+                                    aButton.removeMouseListener(leftMouseButton);
+                                    return;
+                                }
+                                case QUESTION_MARK -> {
+                                    aButton.setIcon(questionMark);
+                                    flagsNumber++;
+                                    minesLeftLabel.setText(String.valueOf(flagsNumber));
+                                    aButton.addMouseListener(leftMouseButton);
+                                    return;
+                                }
+                                case EMPTY -> {
+                                    aButton.setIcon(null);
+                                    return;
+                                }
                             }
                         }
                     }

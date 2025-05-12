@@ -1,32 +1,36 @@
 package pwydmuch.model;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
 import static pwydmuch.view.ImageLoader.*;
 
 public class MyButton extends JButton implements Observer, Serializable, Observable {
+    public enum State {
+        EMPTY, FLAG, QUESTION_MARK
+    }
 
+    private State state = State.EMPTY;
     private int minesAroundNumber;
-    private int clicksNumber;
     private final Set<Observer> observers;
 
     public MyButton() {
         observers = new HashSet<>();
     }
 
-    public int getClicksNumber() {
-        return clicksNumber;
+    public void changeState() {
+        state = switch (state) {
+            case EMPTY -> State.FLAG;
+            case FLAG -> State.QUESTION_MARK;
+            case QUESTION_MARK -> State.EMPTY;
+        };
     }
 
-    public void incrementClickNumber() {
-        clicksNumber++;
+    public State getState() {
+        return state;
     }
 
     public void countMinesAround(int row, int column, Draw draw, MyButton[][] gameBoard) {
@@ -57,7 +61,7 @@ public class MyButton extends JButton implements Observer, Serializable, Observa
     @Override
     public void update() {
         if (isEnabled()) {
-            if (getIcon() != flag && getIcon() != questionMark) {
+            if (state == State.EMPTY) {
                 setEnabled(false);
                 if (minesAroundNumber == 0) {
                     setIcon(null);
