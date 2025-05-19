@@ -19,8 +19,8 @@ public class CloseView extends JFrame implements View {
     private final JButton cancelButton;
     private final MainView mainView;
 
-    CloseView(MainView mainView) {
-        this.columns = mainView.getColumns();
+    CloseView(MainView mainView, int columns) {
+        this.columns = columns;
         this.frameX = mainView.getFrame().getX();
         this.frameY = mainView.getFrame().getY();
         this.frameHeight = mainView.getFrame().getHeight();

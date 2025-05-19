@@ -1,7 +1,6 @@
 package pwydmuch;
 
-import pwydmuch.model.Draw;
-import pwydmuch.model.MyButton;
+import pwydmuch.model.Board;
 import pwydmuch.view.MainView;
 
 import java.io.*;
@@ -34,11 +33,11 @@ public class Minesweeper implements Serializable {
             var gameState = (MainView) file.readObject();
             gameState.getFrame().setVisible(true);
         } catch (Exception e) {
-            var myButtons = new MyButton[13][13];
-            var draw = new Draw(25, myButtons.length, myButtons[0].length);
-            new MainView(myButtons, draw).go();
+            var board = new Board(13, 13, 25);
+            new MainView(board).go();
         }
     }
+
     private static void connectToDatabase() {
         try (Connection conn = DriverManager.getConnection(DB_URL)) {
             if (conn != null) {

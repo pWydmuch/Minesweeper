@@ -1,7 +1,6 @@
 package pwydmuch.view;
 
-import pwydmuch.model.Draw;
-import pwydmuch.model.MyButton;
+import pwydmuch.model.Board;
 
 import javax.swing.*;
 import java.awt.*;
@@ -151,9 +150,8 @@ public class ChangeView extends JFrame implements View, ItemListener {
     }
 
     private void startNewGame() {
-        var myButtons = new MyButton[newGameRows][newGameColumns];
-        var draw = new Draw(newGameMinesNumber, newGameRows, newGameColumns);
-        var mainView = new MainView(myButtons, draw);
+        var board = new Board(newGameRows, newGameColumns, newGameMinesNumber);
+        var mainView = new MainView(board);
         mainView.go();
 //                pwydmuch.Minesweeper.save(sap);
         frame.setVisible(false);

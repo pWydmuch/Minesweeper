@@ -2,47 +2,45 @@ package pwydmuch.view;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class ImageLoader {
 
-    private final static int IMAGE_WIDTH = 20;
-    private final static int IMAGE_HEIGHT = 20;
-    private final static String IMAGES_PATH = "src/main/resources/images/";
-    private final static String NUMBERS_PATH = "src/main/resources/numbers/";
-    public static final Map<Integer, ImageIcon> numberImages;
-    public static ImageIcon questionMark;
-    public static ImageIcon flag;
-    public static ImageIcon bomb;
-    public static ImageIcon hourglass;
+    public static final Map<Integer, ImageIcon> NUMBERS_ICONS;
+    public static final ImageIcon QUESTION_MARK_ICON;
+    public static final ImageIcon FLAG_ICON;
+    public static final ImageIcon BOMB_ICON;
+    public static final ImageIcon HOURGLASS_ICON;
+    private static final int IMAGE_WIDTH = 20;
+    private static final int IMAGE_HEIGHT = 20;
+    private static final String IMAGES_PATH = "src/main/resources/images/";
+    private static final String NUMBERS_PATH = "src/main/resources/numbers/";
 
     static {
-        numberImages = new HashMap<>();
-        loadImages();
-        loadNumbers();
-    }
-
-    private static void loadImages() {
-        questionMark = loadImage("question-mark.png");
-        flag = loadImage("flag.png");
-        bomb = loadImage("bomb.png");
-        hourglass = loadImage("hourglass.png");
+        NUMBERS_ICONS = loadNumbers();
+        QUESTION_MARK_ICON = loadImage("question-mark.png");
+        FLAG_ICON = loadImage("flag.png");
+        BOMB_ICON = loadImage("bomb.png");
+        HOURGLASS_ICON = loadImage("hourglass.png");
     }
 
     private static ImageIcon loadImage(String imageName) {
-        return new ImageIcon(new ImageIcon(IMAGES_PATH + imageName)
-                .getImage()
-                .getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_SMOOTH));
+        return getImageIcon(IMAGES_PATH + imageName);
     }
 
-    private static void loadNumbers() {
-        IntStream.rangeClosed(1, 8).forEach(i -> {
-            var image = new ImageIcon(NUMBERS_PATH + i + ".png")
-                    .getImage()
-                    .getScaledInstance(20, 20, Image.SCALE_SMOOTH);
-            numberImages.put(i, new ImageIcon(image));
-        });
+    private static Map<Integer, ImageIcon> loadNumbers() {
+        return IntStream.rangeClosed(1, 8).mapToObj(i ->
+                Map.entry(i, getImageIcon(NUMBERS_PATH + i + ".png")
+        )).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
+
+    private static ImageIcon getImageIcon(String imagePath) {
+        return new ImageIcon(new ImageIcon(imagePath)
+                .getImage()
+                .getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_SMOOTH)
+        );
+    }
+
 }

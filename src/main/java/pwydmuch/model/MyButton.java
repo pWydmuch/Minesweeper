@@ -1,56 +1,73 @@
 package pwydmuch.model;
 
-import javax.swing.*;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.BiConsumer;
 
-import static pwydmuch.view.ImageLoader.*;
+public class MyButton implements Observer, Serializable, Observable {
 
-public class MyButton extends JButton implements Observer, Serializable, Observable {
-    public enum State {
-        EMPTY, FLAG, QUESTION_MARK
+    public MyButton(int row, int column, boolean containMine) {
+        this.row = row;
+        this.column = column;
+        this.containMine = containMine;
+        observers = new HashSet<>();
     }
 
-    private State state = State.EMPTY;
+    public boolean containMine() {
+        return containMine;
+    }
+
+    public enum State {
+        NOT_MARKED, FLAG, QUESTION_MARK, REVEALED
+    }
+
+    private State state = State.NOT_MARKED;
     private int minesAroundNumber;
+
+    private final boolean containMine;
     private final Set<Observer> observers;
 
-    public MyButton() {
-        observers = new HashSet<>();
+    private final int row;
+    private final int column;
+
+    private boolean isFlagged;
+
+    public void setMinesAround(int i) {
+        minesAroundNumber = i;
     }
 
     public void changeState() {
         state = switch (state) {
-            case EMPTY -> State.FLAG;
+            case NOT_MARKED -> State.FLAG;
             case FLAG -> State.QUESTION_MARK;
-            case QUESTION_MARK -> State.EMPTY;
+            case QUESTION_MARK -> State.NOT_MARKED;
+            case REVEALED -> throw new RuntimeException();
         };
+    }
+
+
+    public int getRow() {
+        return row;
+    }
+
+    public int getColumn() {
+        return column;
     }
 
     public State getState() {
         return state;
     }
 
-    public void countMinesAround(int row, int column, Draw draw, MyButton[][] gameBoard) {
-        BiConsumer<Integer, Integer> countBombs = (Integer r, Integer c) -> minesAroundNumber += draw.checkIfMine(r, c) ? 1 : 0;
-        browseBoard(row, column, gameBoard, countBombs);
+    public int getMinesAroundNumber() {
+        return minesAroundNumber;
     }
 
-    public void addObservers(int row, int column, MyButton[][] gameBoard) {
-        BiConsumer<Integer, Integer> addObservers = (Integer r, Integer c) -> addObserver(gameBoard[r][c]);
-        browseBoard(row, column, gameBoard, addObservers);
+    public boolean isFlagged() {
+        return isFlagged;
     }
 
-    private void browseBoard(int row, int column, MyButton[][] gameBoard, BiConsumer<Integer, Integer> fun) {
-        for (var r = row - 1; r <= row + 1; r++) {
-            for (var c = column - 1; c <= column + 1; c++) {
-                if (r >= 0 && c >= 0 && c < gameBoard[0].length && r < gameBoard.length) {
-                    fun.accept(r, c);
-                }
-            }
-        }
+    public void setFlagged(boolean flagged) {
+        isFlagged = flagged;
     }
 
     @Override
@@ -59,25 +76,20 @@ public class MyButton extends JButton implements Observer, Serializable, Observa
     }
 
     @Override
+    public void notifyObservers() {
+        observers.forEach(Observer::update);
+    }
+
+    @Override
     public void update() {
-        if (isEnabled()) {
-            if (state == State.EMPTY) {
-                setEnabled(false);
-                if (minesAroundNumber == 0) {
-                    setIcon(null);
-                    notifyObservers();
-                } else {
-                    setIcon(numberImages.get(minesAroundNumber));
-                    setDisabledIcon(numberImages.get(minesAroundNumber));
-                }
+        if (state == State.NOT_MARKED) {
+            state = State.REVEALED;
+            if (minesAroundNumber == 0) {
+                notifyObservers();
             }
         }
     }
 
-    @Override
-    public void notifyObservers() {
-        observers.forEach(Observer::update);
-    }
 }
 
 

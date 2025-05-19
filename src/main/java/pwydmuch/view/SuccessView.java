@@ -1,8 +1,8 @@
 package pwydmuch.view;
 
 
-import pwydmuch.model.Draw;
-import pwydmuch.model.MyButton;
+import pwydmuch.model.Board;
+import pwydmuch.model.GameConfig;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,10 +22,10 @@ public class SuccessView extends JFrame implements View {
     private final int columns;
     private final int rows;
 
-    SuccessView(MainView mainView) {
-        this.columns = mainView.getColumns();
-        this.rows = mainView.getRows();
-        this.minesNumber = mainView.getMinesNumber();
+    SuccessView(MainView mainView, GameConfig gameConfig) {
+        this.columns = gameConfig.columns();
+        this.rows = gameConfig.rows();
+        this.minesNumber = gameConfig.minesNumber();
         this.time = mainView.getTime();
         this.frame = mainView.getFrame();
         playAgainButton = new JButton(CLOSE);
@@ -62,10 +62,8 @@ public class SuccessView extends JFrame implements View {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == playAgainButton) {
-
-            var myButtons = new MyButton[rows][columns];
-            var newDraw = new Draw(minesNumber, rows, columns);
-            var mainView = new MainView(myButtons, newDraw);
+            var board = new Board(rows, columns, minesNumber);
+            var mainView = new MainView(board);
             mainView.go();
 //            pwydmuch.Minesweeper.save(mainView);
             System.exit(0);
