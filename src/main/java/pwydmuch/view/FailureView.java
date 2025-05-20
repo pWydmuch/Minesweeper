@@ -56,11 +56,11 @@ public class FailureView extends JFrame implements View {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == closeButton) System.exit(0);
-        var newBoard = new Board(gameConfig);
         if (e.getSource() == playSameGameButton) {
-            new MainView(board).go();
+            new MainView(new Board(gameConfig, board.getMinePoints())).go();
         }
         if (e.getSource() == playNewGameButton) {
+            var newBoard = new Board(gameConfig);
             new MainView(newBoard).go();
         }
         frame.dispose();

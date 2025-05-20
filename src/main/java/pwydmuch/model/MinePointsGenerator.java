@@ -10,8 +10,8 @@ public class MinePointsGenerator implements Serializable {
     private static final Random GENERATOR = new Random();
 
     static Set<Point> makeDraw(GameConfig config) {
-        int minesNumber = config.minesNumber();
-        Set<Point> minePoints = HashSet.newHashSet(minesNumber);
+        var minesNumber = config.minesNumber();
+        var minePoints = HashSet.<Point>newHashSet(minesNumber);
         while (minePoints.size() != minesNumber) {
             var xMineCoordinate = GENERATOR.nextInt(config.rows());
             var yMineCoordinate = GENERATOR.nextInt(config.columns());

@@ -18,16 +18,20 @@ public class Board {
     }
 
     public Board(GameConfig gameConfig) {
+        this(gameConfig,MinePointsGenerator.makeDraw(gameConfig));
+    }
+
+    public Board(GameConfig gameConfig, Set<Point> minePoints) {
         this.gameBoard = new MyButton[gameConfig.rows()][gameConfig.columns()];
-        this.minePoints = MinePointsGenerator.makeDraw(gameConfig);
         this.gameConfig = gameConfig;
+        this.minePoints = minePoints;
         createGameBoard();
         addButtonsFeatures();
     }
 
     private void createGameBoard() {
-        for (int i = 0; i < gameConfig.rows(); i++) {
-            for (int j = 0; j < gameConfig.columns(); j++) {
+        for (var i = 0; i < gameConfig.rows(); i++) {
+            for (var j = 0; j < gameConfig.columns(); j++) {
                 gameBoard[i][j] = new MyButton(i, j, minePoints.contains(new Point(i, j)));
             }
         }
@@ -41,7 +45,7 @@ public class Board {
     }
 
     public boolean isSuccess() {
-        long flaggedButtonsWithMines = getButtonStream()
+        var flaggedButtonsWithMines = getButtonStream()
                 .filter(b -> b.isFlagged() && b.containMine())
                 .count();
         return flaggedButtonsWithMines == gameConfig.minesNumber() && allButtonsWithoutMinesRevealed();
@@ -58,7 +62,7 @@ public class Board {
     }
 
     private void countMinesAround(MyButton b) {
-        AtomicInteger minesAroundNumber = new AtomicInteger(0);
+        var minesAroundNumber = new AtomicInteger(0);
         BiConsumer<Integer, Integer> countBombs = (r, c) ->
                 minesAroundNumber.addAndGet(b.containMine() ? 1 : 0);
         browseBoardAroundButton(b, countBombs);
@@ -70,8 +74,8 @@ public class Board {
     }
 
     private void browseBoardAroundButton(MyButton b, BiConsumer<Integer, Integer> fun) {
-        int row = b.getRow();
-        int column = b.getColumn();
+        var row = b.getRow();
+        var column = b.getColumn();
         for (var r = row - 1; r <= row + 1; r++) {
             for (var c = column - 1; c <= column + 1; c++) {
                 if (isCellWithinBoardLimits(r, c) && isNotTheSameCell(row, column, r, c)) {
