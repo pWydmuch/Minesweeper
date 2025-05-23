@@ -1,13 +1,15 @@
 package pwydmuch.view;
 
-import pwydmuch.model.Board;
-import pwydmuch.model.GameConfig;
-import pwydmuch.model.MyButton;
+import pwydmuch.model.*;
+import pwydmuch.model.Point;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.Set;
 
 import static pwydmuch.view.ImageLoader.*;
 
@@ -16,30 +18,32 @@ public class MainView implements WindowListener, View {
 
     private final static int BUTTON_WIDTH = 35;
     private final static int BUTTON_HEIGHT = 35;
+    private final static String OPTIONS_LABEL = "Options";
+    private final static String CLOSE_LABEL = "Close";
+    private final static String NEW_GAME_LABEL = "New Game";
     private final Board board;
     private Timer timer;    // SPROBUJ USTAWIC TEN WATEK JAKO DEMON
-    private final MyButtonAdapter[][] gameBoardAdapter;
+    private MyButtonAdapter[][] gameBoardAdapter;
     private final RightMouseButton rightMouseButton;
     private final LeftMouseButton leftMouseButton;
     private final JFrame frame;
     private final JPanel jp;
     private final GameConfig gameConfig;
     private int time;
-    private int remainingFlagsToSet;
+    //    private int remainingFlagsToSet;
     private final JLabel timeLabel;
     private final JLabel minesLeftLabel;
 
 
     public MainView(Board board) {
         this.board = board;
-        gameConfig = board.getGameConfig();
-        frame = new JFrame();
-        jp = new JPanel();
-        remainingFlagsToSet = gameConfig.minesNumber();
-        minesLeftLabel = new JLabel(String.valueOf(remainingFlagsToSet));
-        leftMouseButton = new LeftMouseButton();
-        rightMouseButton = new RightMouseButton();
-        timeLabel = new JLabel("0");
+        this.gameConfig = board.getGameConfig();
+        this.frame = new JFrame();
+        this.jp = new JPanel();
+        this.minesLeftLabel = new JLabel(String.valueOf(gameConfig.minesNumber()));
+        this.leftMouseButton = new LeftMouseButton();
+        this.rightMouseButton = new RightMouseButton();
+        this.timeLabel = new JLabel("0");
         this.gameBoardAdapter = MyButtonAdapter.translate(board);
     }
 
@@ -54,7 +58,9 @@ public class MainView implements WindowListener, View {
 
     public void go() {
         setButtons();
-        showView();frame.validate(); /* jak sie wlacza to od razu jest plansza nie trzeba przesiagac? */}
+        showView();
+        frame.validate(); /* jak sie wlacza to od razu jest plansza nie trzeba przesiagac? */
+    }
 
     private void setButtons() {
         jp.setLayout(new GridBagLayout());
@@ -106,13 +112,13 @@ public class MainView implements WindowListener, View {
     private void addMenuBar() {
         var jMB = new JMenuBar();
         var game = new JMenu("Game");
-        var newGame = new JMenuItem("New Game");
+        var newGame = new JMenuItem(NEW_GAME_LABEL);
         game.add(newGame);
         newGame.addActionListener(this);
-        var options = new JMenuItem("Options");
+        var options = new JMenuItem(OPTIONS_LABEL);
         game.add(options);
         options.addActionListener(this);
-        var closing = new JMenuItem("Close");
+        var closing = new JMenuItem(CLOSE_LABEL);
         game.add(closing);
         closing.addActionListener(this);
         jMB.add(game);
@@ -123,23 +129,20 @@ public class MainView implements WindowListener, View {
     @Override
     public void actionPerformed(ActionEvent e) {
         var i = (JMenuItem) e.getSource();
-
-        if (i.getText().equals("Options"))
-            new ChangeView(frame).showView();
-
-        if (i.getText().equals("New Game")) {
-            var board = new Board(gameConfig);
-            new MainView(board).go();
-            frame.dispose();
+        switch (i.getText()) {
+            case OPTIONS_LABEL -> new ChangeView(frame).showView();
+            case NEW_GAME_LABEL -> {
+                var board = new Board(gameConfig);
+                new MainView(board).go();
+                frame.dispose();
+            }
+            case CLOSE_LABEL -> new CloseView(this, gameConfig.columns()).showView();
         }
-        if (i.getText().equals("Close"))
-            new CloseView(this, gameConfig.columns()).showView();
     }
 
     @Override
     public void windowClosing(WindowEvent e) {
         new CloseView(this, gameConfig.columns()).showView();
-
     }
 
     @Override
@@ -166,41 +169,40 @@ public class MainView implements WindowListener, View {
     public void windowDeactivated(WindowEvent e) {
     }
 
+
+    private Optional<MyButtonAdapter> getButtonClicked(MouseEvent e) {
+        return Arrays.stream(gameBoardAdapter)
+                .flatMap(Arrays::stream)
+                .filter(b -> e.getSource() == b)
+                .findAny();
+    }
+
     class RightMouseButton implements MouseListener, Serializable {
 
         @Override
         public void mouseClicked(MouseEvent e) {
             if (SwingUtilities.isRightMouseButton(e)) {
-                for (var buttonRowOrColumn : gameBoardAdapter) { //TODO check
-                    for (var button : buttonRowOrColumn) {
-                        if (e.getSource() == button) {
-                            MyButton underlying = button.getUnderlying();
-                            underlying.changeState();
-                            switch (underlying.getState()) {
-                                case FLAG -> {
-                                    button.setIcon(FLAG_ICON);
-                                    remainingFlagsToSet--;
-                                    minesLeftLabel.setText(String.valueOf(remainingFlagsToSet));
-                                    button.removeMouseListener(leftMouseButton);
-                                }
-                                case QUESTION_MARK -> {
-                                    button.setIcon(QUESTION_MARK_ICON);
-                                    remainingFlagsToSet++;
-                                    minesLeftLabel.setText(String.valueOf(remainingFlagsToSet));
-                                    button.addMouseListener(leftMouseButton);
-                                }
-                                case NOT_MARKED -> {
-                                    button.setIcon(null);
-                                }
-                            }
-                        }
+                getButtonClicked(e).ifPresent(button -> {
+                    RightClickResponse response = board.clickRight(button.getUnderlying());
+                    if (response.gameStatus().equals(GameStatus.SUCCESS)) {
+                        timer.stop();
+                        timer.setDelay(Integer.MAX_VALUE);
+                        new SuccessView(MainView.this, gameConfig).showView();
+                        return;
                     }
-                }
-            }
-            if (board.isSuccess() && remainingFlagsToSet == 0) {
-                timer.stop();
-                timer.setDelay(Integer.MAX_VALUE);
-                new SuccessView(MainView.this, gameConfig).showView();
+                    switch (response.buttonState()) {
+                        case FLAG -> {
+                            button.setIcon(FLAG_ICON);
+                            button.removeMouseListener(leftMouseButton);
+                        }
+                        case QUESTION_MARK -> {
+                            button.setIcon(QUESTION_MARK_ICON);
+                            button.addMouseListener(leftMouseButton);
+                        }
+                        case NOT_MARKED -> button.setIcon(null);
+                    }
+                    minesLeftLabel.setText(String.valueOf(response.remainingFlagsToSet()));
+                });
             }
         }
 
@@ -229,28 +231,28 @@ public class MainView implements WindowListener, View {
         @Override
         public void mouseClicked(MouseEvent e) {
             if (SwingUtilities.isLeftMouseButton(e)) {
-                startTimer();
-                var minePoints = board.getMinePoints();
-                var isMineHit = minePoints.stream().anyMatch(p -> e.getSource() == gameBoardAdapter[p.x()][p.y()]);
-                if (isMineHit) {
-                    minePoints.forEach(p -> {
-                        gameBoardAdapter[p.x()][p.y()].setIcon(BOMB_ICON);
-                        gameBoardAdapter[p.x()][p.y()].setBackground(Color.RED);
-                    });
-                    new FailureView(board, gameConfig, MainView.this.frame).showView();
-                } else {
-                    MyButtonAdapter buttonClicked = getButtonClicked(e);
-                    buttonClicked.removeMouseListener(leftMouseButton);
-                    buttonClicked.removeMouseListener(rightMouseButton);
-                    buttonClicked.update();
-                }
-
+                startTimer(); //TODO seems like timer should be in model -> shouldn't it?
+                Optional<MyButtonAdapter> buttonClicked = getButtonClicked(e);
+                buttonClicked.ifPresent(button -> {
+                    LeftClickResponse response = board.clickLeft(button.getUnderlying());
+                    if (response.gameStatus().equals(GameStatus.GAME_OVER)) {
+                        response.minePoints().forEach(p -> {
+                            gameBoardAdapter[p.x()][p.y()].setIcon(BOMB_ICON);
+                            gameBoardAdapter[p.x()][p.y()].setBackground(Color.RED);
+                        });
+                        new FailureView(board, gameConfig, MainView.this.frame).showView();
+                    } else {
+                        button.removeMouseListener(leftMouseButton);
+                        button.removeMouseListener(rightMouseButton);
+                        gameBoardAdapter = MyButtonAdapter.translate(board);
+                    }
+                });
             }
         }
 
         private void startTimer() {
             if (!timerAlreadyTurnedOn) {
-                timer = new Timer(1000, e2 -> {
+                timer = new Timer(1000, __ -> {
                     //timeLabel.setText("");
                     time++;
                     timeLabel.setText(String.valueOf(time));
@@ -260,16 +262,6 @@ public class MainView implements WindowListener, View {
             }
         }
 
-        private MyButtonAdapter getButtonClicked(MouseEvent e) {
-            for (MyButtonAdapter[] rowOrColumn : gameBoardAdapter) {
-                for (MyButtonAdapter button : rowOrColumn) {
-                    if (e.getSource() == button) {
-                        return button;
-                    }
-                }
-            }
-            throw new RuntimeException();
-        }
 
         @Override
         public void mouseReleased(MouseEvent e) {

@@ -6,15 +6,8 @@ import java.util.Set;
 
 public class MyButton implements Observer, Serializable, Observable {
 
-    public MyButton(int row, int column, boolean containMine) {
-        this.row = row;
-        this.column = column;
-        this.containMine = containMine;
-        observers = new HashSet<>();
-    }
-
-    public boolean containMine() {
-        return containMine;
+    public int getMinesAroundNumber() {
+        return minesAroundNumber;
     }
 
     public enum State {
@@ -22,6 +15,7 @@ public class MyButton implements Observer, Serializable, Observable {
     }
 
     private State state = State.NOT_MARKED;
+
     private int minesAroundNumber;
 
     private final boolean containMine;
@@ -32,19 +26,39 @@ public class MyButton implements Observer, Serializable, Observable {
 
     private boolean isFlagged;
 
-    public void setMinesAround(int i) {
-        minesAroundNumber = i;
+    public MyButton(int row, int column, boolean containMine) {
+        this.row = row;
+        this.column = column;
+        this.containMine = containMine;
+        this.observers = new HashSet<>();
     }
 
-    public void changeState() {
-        state = switch (state) {
-            case NOT_MARKED -> State.FLAG;
-            case FLAG -> State.QUESTION_MARK;
-            case QUESTION_MARK -> State.NOT_MARKED;
-            case REVEALED -> throw new RuntimeException();
+    //TODO -> state pattern for button?? It doesn't look good right now
+    public State changeState(boolean predicate) {
+        return switch (state) {
+            case NOT_MARKED -> {
+                if (predicate) {
+                    isFlagged = true;
+                    state = State.FLAG;
+                }
+                yield state;
+            }
+            case FLAG -> {
+                isFlagged = false;
+                state = State.QUESTION_MARK;
+                yield state;
+            }
+            case QUESTION_MARK -> {
+                state = State.NOT_MARKED;
+                yield state;
+            }
+            case REVEALED -> state;
         };
     }
 
+    public void setMinesAround(int i) {
+        minesAroundNumber = i;
+    }
 
     public int getRow() {
         return row;
@@ -58,16 +72,12 @@ public class MyButton implements Observer, Serializable, Observable {
         return state;
     }
 
-    public int getMinesAroundNumber() {
-        return minesAroundNumber;
+    public boolean containMine() {
+        return containMine;
     }
 
     public boolean isFlagged() {
         return isFlagged;
-    }
-
-    public void setFlagged(boolean flagged) {
-        isFlagged = flagged;
     }
 
     @Override
@@ -80,6 +90,7 @@ public class MyButton implements Observer, Serializable, Observable {
         observers.forEach(Observer::update);
     }
 
+    //TODO -> state pattern for button??
     @Override
     public void update() {
         if (state == State.NOT_MARKED) {
@@ -91,5 +102,3 @@ public class MyButton implements Observer, Serializable, Observable {
     }
 
 }
-
-

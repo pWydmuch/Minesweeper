@@ -13,35 +13,45 @@ public class Board {
 
     private final Set<Point> minePoints;
 
+    private int remainingFlagsToSet;
+
+    private GameStatus gameStatus = GameStatus.IN_PROGRESS;
+
     public Board(int rows, int columns, int minesNumber) {
         this(new GameConfig(rows, columns, minesNumber));
     }
 
     public Board(GameConfig gameConfig) {
-        this(gameConfig,MinePointsGenerator.makeDraw(gameConfig));
+        this(gameConfig, MinePointsGenerator.makeDraw(gameConfig));
     }
 
-    public Board(GameConfig gameConfig, Set<Point> minePoints) {
+    public Board onceAgain() {
+        return new Board(gameConfig, minePoints);
+    }
+
+    private Board(GameConfig gameConfig, Set<Point> minePoints) {
         this.gameBoard = new MyButton[gameConfig.rows()][gameConfig.columns()];
         this.gameConfig = gameConfig;
         this.minePoints = minePoints;
+        this.remainingFlagsToSet = gameConfig.minesNumber();
         createGameBoard();
         addButtonsFeatures();
     }
 
-    private void createGameBoard() {
-        for (var i = 0; i < gameConfig.rows(); i++) {
-            for (var j = 0; j < gameConfig.columns(); j++) {
-                gameBoard[i][j] = new MyButton(i, j, minePoints.contains(new Point(i, j)));
-            }
+    public RightClickResponse clickRight(MyButton underlying) {
+        switch (underlying.changeState(remainingFlagsToSet - 1 >= 0)) {
+            case FLAG -> --remainingFlagsToSet;
+            case QUESTION_MARK -> ++remainingFlagsToSet;
         }
+        if (isSuccess()) gameStatus = GameStatus.SUCCESS;
+        return new RightClickResponse(gameStatus, underlying.getState(), remainingFlagsToSet);
     }
 
-    public void addButtonsFeatures() {
-        getButtonStream().forEach(b -> {
-            addObservers(b);
-            countMinesAround(b);
-        });
+    public LeftClickResponse clickLeft(MyButton underlying) {
+        if (underlying.containMine()) gameStatus = GameStatus.GAME_OVER;
+        if (isSuccess()) gameStatus = GameStatus.SUCCESS;
+        underlying.update();
+        return new LeftClickResponse(gameStatus, minePoints);
     }
 
     public boolean isSuccess() {
@@ -55,10 +65,25 @@ public class Board {
         return Arrays.stream(gameBoard).flatMap(Arrays::stream);
     }
 
+    private void addButtonsFeatures() {
+        getButtonStream().forEach(b -> {
+            addObservers(b);
+            countMinesAround(b);
+        });
+    }
+
     private boolean allButtonsWithoutMinesRevealed() {
         return getButtonStream()
                 .filter(b -> !b.containMine())
                 .allMatch(b -> b.getState() == MyButton.State.REVEALED);
+    }
+
+    private void createGameBoard() {
+        for (var i = 0; i < gameConfig.rows(); i++) {
+            for (var j = 0; j < gameConfig.columns(); j++) {
+                gameBoard[i][j] = new MyButton(i, j, minePoints.contains(new Point(i, j)));
+            }
+        }
     }
 
     private void countMinesAround(MyButton b) {
@@ -97,7 +122,4 @@ public class Board {
         return gameConfig;
     }
 
-    public Set<Point> getMinePoints() {
-        return minePoints;
-    }
 }
