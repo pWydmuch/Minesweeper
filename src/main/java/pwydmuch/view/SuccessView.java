@@ -63,8 +63,7 @@ public class SuccessView extends JFrame implements View {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == playAgainButton) {
             var board = new Board(rows, columns, minesNumber);
-            var mainView = new MainView(board);
-            mainView.go();
+            new MainView(board);
 //            pwydmuch.Minesweeper.save(mainView);
             System.exit(0);
         }

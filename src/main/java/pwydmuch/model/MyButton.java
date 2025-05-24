@@ -56,6 +56,17 @@ public class MyButton implements Observer, Serializable, Observable {
         };
     }
 
+    //TODO -> state pattern for button??
+    @Override
+    public void update() {
+        if (state == State.NOT_MARKED && !containMine) {
+            state = State.REVEALED;
+            if (minesAroundNumber == 0) {
+                notifyObservers();
+            }
+        }
+    }
+
     public void setMinesAround(int i) {
         minesAroundNumber = i;
     }
@@ -90,15 +101,5 @@ public class MyButton implements Observer, Serializable, Observable {
         observers.forEach(Observer::update);
     }
 
-    //TODO -> state pattern for button??
-    @Override
-    public void update() {
-        if (state == State.NOT_MARKED) {
-            state = State.REVEALED;
-            if (minesAroundNumber == 0) {
-                notifyObservers();
-            }
-        }
-    }
 
 }

@@ -34,7 +34,7 @@ public class Minesweeper implements Serializable {
             gameState.getFrame().setVisible(true);
         } catch (Exception e) {
             var board = new Board(13, 13, 25);
-            new MainView(board).go();
+            new MainView(board);
         }
     }
 

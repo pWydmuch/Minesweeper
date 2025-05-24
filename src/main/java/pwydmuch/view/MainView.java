@@ -1,7 +1,6 @@
 package pwydmuch.view;
 
 import pwydmuch.model.*;
-import pwydmuch.model.Point;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,7 +8,6 @@ import java.awt.event.*;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.Set;
 
 import static pwydmuch.view.ImageLoader.*;
 
@@ -27,7 +25,7 @@ public class MainView implements WindowListener, View {
     private final RightMouseButton rightMouseButton;
     private final LeftMouseButton leftMouseButton;
     private final JFrame frame;
-    private final JPanel jp;
+    private JPanel jp;
     private final GameConfig gameConfig;
     private int time;
     //    private int remainingFlagsToSet;
@@ -39,12 +37,22 @@ public class MainView implements WindowListener, View {
         this.board = board;
         this.gameConfig = board.getGameConfig();
         this.frame = new JFrame();
-        this.jp = new JPanel();
         this.minesLeftLabel = new JLabel(String.valueOf(gameConfig.minesNumber()));
         this.leftMouseButton = new LeftMouseButton();
         this.rightMouseButton = new RightMouseButton();
         this.timeLabel = new JLabel("0");
         this.gameBoardAdapter = MyButtonAdapter.translate(board);
+        refreshGrid();
+        showView();
+        frame.validate(); /* jak sie wlacza to od razu jest plansza nie trzeba przesiagac? */
+    }
+
+    private void refreshGrid() {
+        if (jp != null) {
+            frame.remove(jp);
+        }
+        setButtons();
+        frame.add(jp);
     }
 
     public int getTime() {
@@ -55,14 +63,8 @@ public class MainView implements WindowListener, View {
         return frame;
     }
 
-
-    public void go() {
-        setButtons();
-        showView();
-        frame.validate(); /* jak sie wlacza to od razu jest plansza nie trzeba przesiagac? */
-    }
-
-    private void setButtons() {
+    private JPanel setButtons() {
+        JPanel jp = new JPanel();
         jp.setLayout(new GridBagLayout());
         var gc = new GridBagConstraints();
         for (var i = 0; i < gameBoardAdapter.length; i++) {
@@ -75,6 +77,8 @@ public class MainView implements WindowListener, View {
                 jp.add(gameBoardAdapter[i][j], gc);
             }
         }
+        this.jp = jp;
+        return jp;
     }
 
     @Override
@@ -133,7 +137,7 @@ public class MainView implements WindowListener, View {
             case OPTIONS_LABEL -> new ChangeView(frame).showView();
             case NEW_GAME_LABEL -> {
                 var board = new Board(gameConfig);
-                new MainView(board).go();
+                new MainView(board);
                 frame.dispose();
             }
             case CLOSE_LABEL -> new CloseView(this, gameConfig.columns()).showView();
@@ -245,6 +249,7 @@ public class MainView implements WindowListener, View {
                         button.removeMouseListener(leftMouseButton);
                         button.removeMouseListener(rightMouseButton);
                         gameBoardAdapter = MyButtonAdapter.translate(board);
+                        refreshGrid();
                     }
                 });
             }

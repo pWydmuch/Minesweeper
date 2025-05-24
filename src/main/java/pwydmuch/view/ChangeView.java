@@ -152,7 +152,6 @@ public class ChangeView extends JFrame implements View, ItemListener {
     private void startNewGame() {
         var board = new Board(newGameRows, newGameColumns, newGameMinesNumber);
         var mainView = new MainView(board);
-        mainView.go();
 //                pwydmuch.Minesweeper.save(sap);
         frame.setVisible(false);
         frame = null;
