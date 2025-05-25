@@ -63,7 +63,7 @@ public class MainView implements WindowListener, View {
         return frame;
     }
 
-    private JPanel setButtons() {
+    private void setButtons() {
         JPanel jp = new JPanel();
         jp.setLayout(new GridBagLayout());
         var gc = new GridBagConstraints();
@@ -78,7 +78,6 @@ public class MainView implements WindowListener, View {
             }
         }
         this.jp = jp;
-        return jp;
     }
 
     @Override

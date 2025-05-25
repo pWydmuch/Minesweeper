@@ -89,7 +89,7 @@ public class Board {
     private void countMinesAround(MyButton b) {
         var minesAroundNumber = new AtomicInteger(0);
         BiConsumer<Integer, Integer> countBombs = (r, c) ->
-                minesAroundNumber.addAndGet(b.containMine() ? 1 : 0);
+                minesAroundNumber.addAndGet(gameBoard[r][c].containMine() ? 1 : 0);
         browseBoardAroundButton(b, countBombs);
         b.setMinesAround(minesAroundNumber.get());
     }
