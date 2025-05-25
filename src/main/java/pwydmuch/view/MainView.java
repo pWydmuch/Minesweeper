@@ -70,8 +70,13 @@ public class MainView implements WindowListener, View {
         for (var i = 0; i < gameBoardAdapter.length; i++) {
             for (var j = 0; j < gameBoardAdapter[i].length; j++) {
                 gameBoardAdapter[i][j].setPreferredSize(new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT));
-                gameBoardAdapter[i][j].addMouseListener(rightMouseButton);
-                gameBoardAdapter[i][j].addMouseListener(leftMouseButton);
+                switch (gameBoardAdapter[i][j].getUnderlying().getState()) {
+                    case NOT_MARKED, QUESTION_MARK -> {
+                        gameBoardAdapter[i][j].addMouseListener(rightMouseButton);
+                        gameBoardAdapter[i][j].addMouseListener(leftMouseButton);
+                    }
+                    case FLAG -> gameBoardAdapter[i][j].addMouseListener(rightMouseButton);
+                }
                 gc.gridx = j;
                 gc.gridy = i;
                 jp.add(gameBoardAdapter[i][j], gc);
@@ -172,7 +177,6 @@ public class MainView implements WindowListener, View {
     public void windowDeactivated(WindowEvent e) {
     }
 
-
     private Optional<MyButtonAdapter> getButtonClicked(MouseEvent e) {
         return Arrays.stream(gameBoardAdapter)
                 .flatMap(Arrays::stream)
@@ -193,22 +197,11 @@ public class MainView implements WindowListener, View {
                         new SuccessView(MainView.this, gameConfig).showView();
                         return;
                     }
-                    switch (response.buttonState()) {
-                        case FLAG -> {
-                            button.setIcon(FLAG_ICON);
-                            button.removeMouseListener(leftMouseButton);
-                        }
-                        case QUESTION_MARK -> {
-                            button.setIcon(QUESTION_MARK_ICON);
-                            button.addMouseListener(leftMouseButton);
-                        }
-                        case NOT_MARKED -> button.setIcon(null);
-                    }
+                    button.flagButton();
                     minesLeftLabel.setText(String.valueOf(response.remainingFlagsToSet()));
                 });
             }
         }
-
 
         @Override
         public void mouseReleased(MouseEvent e) {
@@ -235,8 +228,7 @@ public class MainView implements WindowListener, View {
         public void mouseClicked(MouseEvent e) {
             if (SwingUtilities.isLeftMouseButton(e)) {
                 startTimer(); //TODO seems like timer should be in model -> shouldn't it?
-                Optional<MyButtonAdapter> buttonClicked = getButtonClicked(e);
-                buttonClicked.ifPresent(button -> {
+                getButtonClicked(e).ifPresent(button -> {
                     LeftClickResponse response = board.clickLeft(button.getUnderlying());
                     if (response.gameStatus().equals(GameStatus.GAME_OVER)) {
                         response.minePoints().forEach(p -> {
@@ -265,7 +257,6 @@ public class MainView implements WindowListener, View {
                 timerAlreadyTurnedOn = true;
             }
         }
-
 
         @Override
         public void mouseReleased(MouseEvent e) {

@@ -17,7 +17,6 @@ public class Minesweeper implements Serializable {
     private static final Path SAVE_FILE = Path.of("game-state.ser");
     private static final String DB_URL = "jdbc:sqlite:minesweeper.db";
 
-
     public static void save(MainView sap) {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try (var file = new ObjectOutputStream(Files.newOutputStream(SAVE_FILE))) {
@@ -27,6 +26,7 @@ public class Minesweeper implements Serializable {
         }));
     }
 
+    //TODO tests in spock?
     public static void main(String[] args) {
         connectToDatabase();
         try (var file = new ObjectInputStream(Files.newInputStream(SAVE_FILE))) {

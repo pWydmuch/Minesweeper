@@ -8,8 +8,7 @@ import javax.swing.*;
 
 import java.awt.*;
 
-import static pwydmuch.view.ImageLoader.BOMB_ICON;
-import static pwydmuch.view.ImageLoader.NUMBERS_ICONS;
+import static pwydmuch.view.ImageLoader.*;
 
 public class MyButtonAdapter extends JButton {
     private final MyButton myButton;
@@ -25,19 +24,34 @@ public class MyButtonAdapter extends JButton {
             if (b.getState().equals(MyButton.State.REVEALED)) {
                 boardAdapters[b.getRow()][b.getColumn()].reveal();
             }
+            boardAdapters[b.getRow()][b.getColumn()].flagButton();
         });
         return boardAdapters;
     }
 
+    public void flagButton() {
+        setIcon(switch (myButton.getState()) {
+            case FLAG -> FLAG_ICON;
+            case QUESTION_MARK -> QUESTION_MARK_ICON;
+            case REVEALED -> showMinesAroundNr();
+            case NOT_MARKED -> null;
+        });
+    }
+
     private void reveal() {
         setEnabled(false);
+        showMinesAroundNr();
+    }
+
+    private ImageIcon showMinesAroundNr() {
         int minesAroundNumber = myButton.getMinesAroundNumber();
-        if (minesAroundNumber == 0) {
-            setIcon(null);
-        } else {
-            setIcon(NUMBERS_ICONS.get(minesAroundNumber));
-            setDisabledIcon(NUMBERS_ICONS.get(minesAroundNumber));
-        }
+        return switch (minesAroundNumber) {
+            case 0 -> null;
+            default -> {
+                setDisabledIcon(NUMBERS_ICONS.get(minesAroundNumber));
+                yield NUMBERS_ICONS.get(minesAroundNumber);
+            }
+        };
     }
 
     public MyButton getUnderlying() {
