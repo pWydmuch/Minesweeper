@@ -1,15 +1,14 @@
 package pwydmuch.model;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 public class Board {
-    private final MyButton[][] gameBoard;
-
-    private final GameConfig gameConfig;
+    private final Field[][] gameBoard;
 
     private final Set<Point> minePoints;
 
@@ -22,46 +21,77 @@ public class Board {
     }
 
     public Board(GameConfig gameConfig) {
-        this(gameConfig, MinePointsGenerator.makeDraw(gameConfig));
+        this(gameConfig.rows(), gameConfig.columns(), MinePointsGenerator.makeDraw(gameConfig));
     }
 
     public Board onceAgain() {
-        return new Board(gameConfig, minePoints);
+        return new Board(gameBoard.length, gameBoard[0].length, minePoints);
     }
 
-    private Board(GameConfig gameConfig, Set<Point> minePoints) {
-        this.gameBoard = new MyButton[gameConfig.rows()][gameConfig.columns()];
-        this.gameConfig = gameConfig;
+    private Board(int rows, int columns, Set<Point> minePoints) {
+        if(rows <= 0 || columns <= 0) {
+            throw new IllegalArgumentException("Rows and columns must be greater than zero");
+        }
+        if (columns * rows < minePoints.size()) {
+            throw new IllegalArgumentException("Too many mines for given board size");
+        }
+        this.gameBoard = new Field[rows][columns];
         this.minePoints = minePoints;
-        this.remainingFlagsToSet = gameConfig.minesNumber();
+        this.remainingFlagsToSet = minePoints.size();
         createGameBoard();
         addButtonsFeatures();
     }
 
-    public RightClickResponse clickRight(MyButton underlying) {
-        switch (underlying.changeState(remainingFlagsToSet - 1 >= 0)) {
+    public RightClickResponse clickRight(int row, int column) {
+        var fieldClicked = gameBoard[row][column];
+        switch (fieldClicked.changeState(remainingFlagsToSet - 1 >= 0)) {
             case FLAG -> --remainingFlagsToSet;
             case QUESTION_MARK -> ++remainingFlagsToSet;
         }
         if (isSuccess()) gameStatus = GameStatus.SUCCESS;
-        return new RightClickResponse(gameStatus, underlying.getState(), remainingFlagsToSet);
+        return new RightClickResponse(gameStatus, FieldDto.fromField(fieldClicked), remainingFlagsToSet);
     }
 
-    public LeftClickResponse clickLeft(MyButton underlying) {
-        if (underlying.containMine()) gameStatus = GameStatus.GAME_OVER;
+    public LeftClickResponse clickLeft(int row, int column) {
+        var buttonClicked = gameBoard[row][column];
+        if (buttonClicked.containMine()) gameStatus = GameStatus.GAME_OVER;
         if (isSuccess()) gameStatus = GameStatus.SUCCESS;
-        underlying.update();
-        return new LeftClickResponse(gameStatus, minePoints);
+        buttonClicked.update();
+        return new LeftClickResponse(gameStatus, getFieldDtos() ,minePoints);
     }
 
-    public boolean isSuccess() {
+    public GameState getGameState() {
+        return new GameState(
+                getFieldDtos(),
+                minePoints,
+                gameStatus,
+                remainingFlagsToSet
+        );
+    }
+
+    private List<FieldDto> getFieldDtos() {
+        return Arrays.stream(gameBoard)
+                .flatMap(Arrays::stream)
+                .map(FieldDto::fromField)
+                .toList();
+    }
+
+    public GameConfig getGameConfig() {
+        return new GameConfig(
+                gameBoard.length,
+                gameBoard[0].length,
+                minePoints.size()
+        );
+    }
+
+    private boolean isSuccess() {
         var flaggedButtonsWithMines = getButtonStream()
                 .filter(b -> b.isFlagged() && b.containMine())
                 .count();
-        return flaggedButtonsWithMines == gameConfig.minesNumber() && allButtonsWithoutMinesRevealed();
+        return flaggedButtonsWithMines == minePoints.size() && allButtonsWithoutMinesRevealed();
     }
 
-    public Stream<MyButton> getButtonStream() {
+    private Stream<Field> getButtonStream() {
         return Arrays.stream(gameBoard).flatMap(Arrays::stream);
     }
 
@@ -75,18 +105,18 @@ public class Board {
     private boolean allButtonsWithoutMinesRevealed() {
         return getButtonStream()
                 .filter(b -> !b.containMine())
-                .allMatch(b -> b.getState() == MyButton.State.REVEALED);
+                .allMatch(b -> b.getState() == FieldState.REVEALED);
     }
 
     private void createGameBoard() {
-        for (var i = 0; i < gameConfig.rows(); i++) {
-            for (var j = 0; j < gameConfig.columns(); j++) {
-                gameBoard[i][j] = new MyButton(i, j, minePoints.contains(new Point(i, j)));
+        for (var i = 0; i < gameBoard.length; i++) {
+            for (var j = 0; j < gameBoard[0].length; j++) {
+                gameBoard[i][j] = new Field(i, j, minePoints.contains(new Point(i, j)));
             }
         }
     }
 
-    private void countMinesAround(MyButton b) {
+    private void countMinesAround(Field b) {
         var minesAroundNumber = new AtomicInteger(0);
         BiConsumer<Integer, Integer> countBombs = (r, c) ->
                 minesAroundNumber.addAndGet(gameBoard[r][c].containMine() ? 1 : 0);
@@ -94,11 +124,11 @@ public class Board {
         b.setMinesAround(minesAroundNumber.get());
     }
 
-    private void addObservers(MyButton b) {
+    private void addObservers(Field b) {
         browseBoardAroundButton(b, (r, c) -> b.addObserver(gameBoard[r][c]));
     }
 
-    private void browseBoardAroundButton(MyButton b, BiConsumer<Integer, Integer> fun) {
+    private void browseBoardAroundButton(Field b, BiConsumer<Integer, Integer> fun) {
         var row = b.getRow();
         var column = b.getColumn();
         for (var r = row - 1; r <= row + 1; r++) {
@@ -116,10 +146,6 @@ public class Board {
 
     private boolean isCellWithinBoardLimits(int r, int c) {
         return r >= 0 && c >= 0 && c < gameBoard[0].length && r < gameBoard.length;
-    }
-
-    public GameConfig getGameConfig() {
-        return gameConfig;
     }
 
 }

@@ -7,6 +7,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
 import static pwydmuch.view.ImageLoader.*;
@@ -28,7 +30,6 @@ public class MainView implements WindowListener, View {
     private JPanel jp;
     private final GameConfig gameConfig;
     private int time;
-    //    private int remainingFlagsToSet;
     private final JLabel timeLabel;
     private final JLabel minesLeftLabel;
 
@@ -41,45 +42,62 @@ public class MainView implements WindowListener, View {
         this.leftMouseButton = new LeftMouseButton();
         this.rightMouseButton = new RightMouseButton();
         this.timeLabel = new JLabel("0");
-        this.gameBoardAdapter = MyButtonAdapter.translate(board);
-        refreshGrid();
+        this.gameBoardAdapter = translate(board.getGameState().fieldDtos());
         showView();
         frame.validate(); /* jak sie wlacza to od razu jest plansza nie trzeba przesiagac? */
     }
 
-    private void refreshGrid() {
-        if (jp != null) {
-            frame.remove(jp);
-        }
-        setButtons();
-        frame.add(jp);
-    }
 
-    public int getTime() {
+    int getTime() {
         return time;
     }
 
-    public JFrame getFrame() {
+    JFrame getFrame() {
         return frame;
     }
 
-    private void setButtons() {
+    private MyButtonAdapter[][] translate(List<FieldDto> board) {
+        MyButtonAdapter[][] boardAdapters = createArray(board);
+        board.forEach(b -> {
+            int i = b.row();
+            int j = b.column();
+            boardAdapters[i][j] = new MyButtonAdapter(b);
+            boardAdapters[i][j].flagButton(b);
+            switch (b.fieldState()) {
+                case NOT_MARKED, QUESTION_MARK -> {
+                    boardAdapters[i][j].addMouseListener(rightMouseButton);
+                    boardAdapters[i][j].addMouseListener(leftMouseButton);
+                }
+                case FLAG -> boardAdapters[i][j].addMouseListener(rightMouseButton);
+            }
+        });
+        refreshGrid(boardAdapters);
+        return boardAdapters;
+    }
+
+    private void refreshGrid(MyButtonAdapter[][] boardAdapters) {
+        if (jp != null) {
+            frame.remove(jp);
+        }
+        setButtons(boardAdapters);
+        frame.add(jp);
+    }
+
+    private static MyButtonAdapter[][] createArray(List<FieldDto> board) {
+        int rows = board.stream().max(Comparator.comparing(FieldDto::row)).map(f -> f.row() + 1).get();
+        int columns = board.stream().max(Comparator.comparing(FieldDto::column)).map(f -> f.column() + 1).get();
+        return new MyButtonAdapter[rows][columns];
+    }
+
+    private void setButtons(MyButtonAdapter[][] boardAdapters) {
         JPanel jp = new JPanel();
         jp.setLayout(new GridBagLayout());
         var gc = new GridBagConstraints();
-        for (var i = 0; i < gameBoardAdapter.length; i++) {
-            for (var j = 0; j < gameBoardAdapter[i].length; j++) {
-                gameBoardAdapter[i][j].setPreferredSize(new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT));
-                switch (gameBoardAdapter[i][j].getUnderlying().getState()) {
-                    case NOT_MARKED, QUESTION_MARK -> {
-                        gameBoardAdapter[i][j].addMouseListener(rightMouseButton);
-                        gameBoardAdapter[i][j].addMouseListener(leftMouseButton);
-                    }
-                    case FLAG -> gameBoardAdapter[i][j].addMouseListener(rightMouseButton);
-                }
+        for (var i = 0; i < boardAdapters.length; i++) {
+            for (var j = 0; j < boardAdapters[i].length; j++) {
                 gc.gridx = j;
                 gc.gridy = i;
-                jp.add(gameBoardAdapter[i][j], gc);
+                jp.add(boardAdapters[i][j], gc);
             }
         }
         this.jp = jp;
@@ -184,20 +202,28 @@ public class MainView implements WindowListener, View {
                 .findAny();
     }
 
+    public void setVisible() {
+        frame.setVisible(true);
+    }
+
     class RightMouseButton implements MouseListener, Serializable {
 
         @Override
         public void mouseClicked(MouseEvent e) {
             if (SwingUtilities.isRightMouseButton(e)) {
                 getButtonClicked(e).ifPresent(button -> {
-                    RightClickResponse response = board.clickRight(button.getUnderlying());
+                    RightClickResponse response = board.clickRight(button.getRow(), button.getColumn());
                     if (response.gameStatus().equals(GameStatus.SUCCESS)) {
                         timer.stop();
                         timer.setDelay(Integer.MAX_VALUE);
                         new SuccessView(MainView.this, gameConfig).showView();
                         return;
                     }
-                    button.flagButton();
+                    switch (response.field().fieldState()) {
+                        case FLAG -> button.removeMouseListener(leftMouseButton);
+                        case NOT_MARKED -> button.addMouseListener(leftMouseButton);
+                    }
+                    button.flagButton(response.field());
                     minesLeftLabel.setText(String.valueOf(response.remainingFlagsToSet()));
                 });
             }
@@ -229,7 +255,7 @@ public class MainView implements WindowListener, View {
             if (SwingUtilities.isLeftMouseButton(e)) {
                 startTimer(); //TODO seems like timer should be in model -> shouldn't it?
                 getButtonClicked(e).ifPresent(button -> {
-                    LeftClickResponse response = board.clickLeft(button.getUnderlying());
+                    LeftClickResponse response = board.clickLeft(button.getRow(), button.getColumn());
                     if (response.gameStatus().equals(GameStatus.GAME_OVER)) {
                         response.minePoints().forEach(p -> {
                             gameBoardAdapter[p.x()][p.y()].setIcon(BOMB_ICON);
@@ -239,8 +265,7 @@ public class MainView implements WindowListener, View {
                     } else {
                         button.removeMouseListener(leftMouseButton);
                         button.removeMouseListener(rightMouseButton);
-                        gameBoardAdapter = MyButtonAdapter.translate(board);
-                        refreshGrid();
+                        gameBoardAdapter = translate(response.fields());
                     }
                 });
             }

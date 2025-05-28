@@ -4,17 +4,9 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-public class MyButton implements Observer, Serializable, Observable {
+class Field implements Observer, Serializable, Observable {
 
-    public int getMinesAroundNumber() {
-        return minesAroundNumber;
-    }
-
-    public enum State {
-        NOT_MARKED, FLAG, QUESTION_MARK, REVEALED
-    }
-
-    private State state = State.NOT_MARKED;
+    private FieldState state = FieldState.NOT_MARKED;
 
     private int minesAroundNumber;
 
@@ -26,7 +18,7 @@ public class MyButton implements Observer, Serializable, Observable {
 
     private boolean isFlagged;
 
-    public MyButton(int row, int column, boolean containMine) {
+    Field(int row, int column, boolean containMine) {
         this.row = row;
         this.column = column;
         this.containMine = containMine;
@@ -34,22 +26,22 @@ public class MyButton implements Observer, Serializable, Observable {
     }
 
     //TODO -> state pattern for button?? It doesn't look good right now
-    public State changeState(boolean predicate) {
+    FieldState changeState(boolean predicate) {
         return switch (state) {
             case NOT_MARKED -> {
                 if (predicate) {
                     isFlagged = true;
-                    state = State.FLAG;
+                    state = FieldState.FLAG;
                 }
                 yield state;
             }
             case FLAG -> {
                 isFlagged = false;
-                state = State.QUESTION_MARK;
+                state = FieldState.QUESTION_MARK;
                 yield state;
             }
             case QUESTION_MARK -> {
-                state = State.NOT_MARKED;
+                state = FieldState.NOT_MARKED;
                 yield state;
             }
             case REVEALED -> state;
@@ -59,35 +51,39 @@ public class MyButton implements Observer, Serializable, Observable {
     //TODO -> state pattern for button??
     @Override
     public void update() {
-        if (state == State.NOT_MARKED && !containMine) {
-            state = State.REVEALED;
+        if (state == FieldState.NOT_MARKED && !containMine) {
+            state = FieldState.REVEALED;
             if (minesAroundNumber == 0) {
                 notifyObservers();
             }
         }
     }
 
-    public void setMinesAround(int i) {
+    void setMinesAround(int i) {
         minesAroundNumber = i;
     }
 
-    public int getRow() {
+    int getRow() {
         return row;
     }
 
-    public int getColumn() {
+    int getColumn() {
         return column;
     }
 
-    public State getState() {
+    FieldState getState() {
         return state;
     }
 
-    public boolean containMine() {
+    boolean containMine() {
         return containMine;
     }
 
-    public boolean isFlagged() {
+    int getMinesAroundNumber() {
+        return minesAroundNumber;
+    }
+
+    boolean isFlagged() {
         return isFlagged;
     }
 

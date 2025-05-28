@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-public class MinePointsGenerator implements Serializable {
+class MinePointsGenerator implements Serializable {
     private static final Random GENERATOR = new Random();
 
     static Set<Point> makeDraw(GameConfig config) {

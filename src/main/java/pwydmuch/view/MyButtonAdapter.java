@@ -1,8 +1,7 @@
 package pwydmuch.view;
 
 import pwydmuch.model.Board;
-import pwydmuch.model.MyButton;
-import pwydmuch.model.Observer;
+import pwydmuch.model.FieldDto;
 
 import javax.swing.*;
 
@@ -11,40 +10,25 @@ import java.awt.*;
 import static pwydmuch.view.ImageLoader.*;
 
 public class MyButtonAdapter extends JButton {
-    private final MyButton myButton;
-
-    public MyButtonAdapter(MyButton myButton) {
-        this.myButton = myButton;
+    private final int row;
+    private final int column;
+    public MyButtonAdapter(FieldDto field) {
+        this.row = field.row();
+        this.column = field.column();
+        setPreferredSize(new Dimension(30, 30));
     }
 
-    public static MyButtonAdapter[][] translate(Board board) {
-        MyButtonAdapter[][] boardAdapters = createArray(board);
-        board.getButtonStream().forEach(b -> {
-            boardAdapters[b.getRow()][b.getColumn()] = new MyButtonAdapter(b);
-            if (b.getState().equals(MyButton.State.REVEALED)) {
-                boardAdapters[b.getRow()][b.getColumn()].reveal();
-            }
-            boardAdapters[b.getRow()][b.getColumn()].flagButton();
-        });
-        return boardAdapters;
-    }
-
-    public void flagButton() {
-        setIcon(switch (myButton.getState()) {
+    public void flagButton(FieldDto field) {
+        setIcon(switch (field.fieldState()) {
             case FLAG -> FLAG_ICON;
             case QUESTION_MARK -> QUESTION_MARK_ICON;
-            case REVEALED -> showMinesAroundNr();
+            case REVEALED -> showMinesAroundNr(field.minesAround());
             case NOT_MARKED -> null;
         });
     }
 
-    private void reveal() {
+    private ImageIcon showMinesAroundNr(Integer minesAroundNumber) {
         setEnabled(false);
-        showMinesAroundNr();
-    }
-
-    private ImageIcon showMinesAroundNr() {
-        int minesAroundNumber = myButton.getMinesAroundNumber();
         return switch (minesAroundNumber) {
             case 0 -> null;
             default -> {
@@ -54,13 +38,12 @@ public class MyButtonAdapter extends JButton {
         };
     }
 
-    public MyButton getUnderlying() {
-        return myButton;
+
+    public int getRow() {
+        return row;
     }
 
-    private static MyButtonAdapter[][] createArray(Board board) {
-        int rows = board.getGameConfig().rows();
-        int columns = board.getGameConfig().columns();
-        return new MyButtonAdapter[rows][columns];
+    public int getColumn() {
+        return column;
     }
 }

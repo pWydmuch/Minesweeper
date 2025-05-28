@@ -31,7 +31,7 @@ public class Minesweeper implements Serializable {
         connectToDatabase();
         try (var file = new ObjectInputStream(Files.newInputStream(SAVE_FILE))) {
             var gameState = (MainView) file.readObject();
-            gameState.getFrame().setVisible(true);
+            gameState.setVisible();
         } catch (Exception e) {
             var board = new Board(13, 13, 25);
             new MainView(board);
