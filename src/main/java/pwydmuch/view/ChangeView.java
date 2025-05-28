@@ -68,9 +68,7 @@ public class ChangeView extends JFrame implements View, ItemListener {
         jPan.add(jPan3, BorderLayout.CENTER);
         jPan.add(jPan4, BorderLayout.SOUTH);
         add(jPan);
-        for (var c : newGameOptions) {
-            c.addItemListener(this);
-        }
+        for (var c : newGameOptions) c.addItemListener(this);
     }
 
     private void setPanel2() {
@@ -139,14 +137,15 @@ public class ChangeView extends JFrame implements View, ItemListener {
         } else if (newGameColumns > 30 || newGameColumns < 9) {
             errorLabel.setVisible(true);
             errorLabel.setText("Columns out of range");
-        } else if (isNumberOfMinesCorrect()) {
+        } else if (isNumberOfMinesIncorrect()) {
             errorLabel.setVisible(true);
             errorLabel.setText("Number of mines out of range");
         } else startNewGame();
     }
 
-    private boolean isNumberOfMinesCorrect() {
-        return newGameMinesNumber < 10 || newGameMinesNumber > 668 || newGameMinesNumber > newGameColumns * newGameRows;
+    private boolean isNumberOfMinesIncorrect() {
+        return newGameMinesNumber < 10 || newGameMinesNumber > 668
+                || newGameMinesNumber > newGameColumns * newGameRows;
     }
 
     private void startNewGame() {
@@ -176,27 +175,29 @@ public class ChangeView extends JFrame implements View, ItemListener {
     }
 
     private void selectOption(int optionIndex) {
-        if (optionIndex == CUSTOM_OPTION_INDEX) {
-            customRowsInput.setFocusable(true);
-            setEditableInputsTo(true);
-        }
-        if (optionIndex == BEGINNER_OPTION_INDEX) {
-            setEditableInputsTo(false);
-            newGameMinesNumber = 10;
-            newGameRows = 9;
-            newGameColumns = 9;
-        }
-        if (optionIndex == INTERMEDIATE_OPTION_INDEX) {
-            setEditableInputsTo(false);
-            newGameMinesNumber = 40;
-            newGameRows = 16;
-            newGameColumns = 16;
-        }
-        if (optionIndex == ADVANCED_OPTION_INDEX) {
-            setEditableInputsTo(false);
-            newGameMinesNumber = 99;
-            newGameRows = 16;
-            newGameColumns = 30;
+        switch (optionIndex) {
+            case CUSTOM_OPTION_INDEX -> {
+                customRowsInput.setFocusable(true);
+                setEditableInputsTo(true);
+            }
+            case BEGINNER_OPTION_INDEX -> {
+                setEditableInputsTo(false);
+                newGameMinesNumber = 10;
+                newGameRows = 9;
+                newGameColumns = 9;
+            }
+            case INTERMEDIATE_OPTION_INDEX -> {
+                setEditableInputsTo(false);
+                newGameMinesNumber = 40;
+                newGameRows = 16;
+                newGameColumns = 16;
+            }
+            case ADVANCED_OPTION_INDEX -> {
+                setEditableInputsTo(false);
+                newGameMinesNumber = 99;
+                newGameRows = 16;
+                newGameColumns = 30;
+            }
         }
     }
 
