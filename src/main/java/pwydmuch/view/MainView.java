@@ -213,18 +213,17 @@ public class MainView implements WindowListener, View {
             if (SwingUtilities.isRightMouseButton(e)) {
                 getButtonClicked(e).ifPresent(button -> {
                     RightClickResponse response = board.clickRight(button.getRow(), button.getColumn());
-                    if (response.gameStatus().equals(GameStatus.SUCCESS)) {
-                        timer.stop();
-                        timer.setDelay(Integer.MAX_VALUE);
-                        new SuccessView(MainView.this, gameConfig).showView();
-                        return;
-                    }
                     switch (response.field().fieldState()) {
                         case FLAG -> button.removeMouseListener(leftMouseButton);
                         case NOT_MARKED -> button.addMouseListener(leftMouseButton);
                     }
                     button.flagButton(response.field());
                     minesLeftLabel.setText(String.valueOf(response.remainingFlagsToSet()));
+                    if (response.gameStatus().equals(GameStatus.SUCCESS)) {
+                        timer.stop();
+                        timer.setDelay(Integer.MAX_VALUE);
+                        new SuccessView(MainView.this, gameConfig).showView();
+                    }
                 });
             }
         }

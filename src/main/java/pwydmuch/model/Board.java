@@ -28,7 +28,7 @@ public class Board {
         return new Board(gameBoard.length, gameBoard[0].length, minePoints);
     }
 
-    private Board(int rows, int columns, Set<Point> minePoints) {
+    Board(int rows, int columns, Set<Point> minePoints) {
         if(rows <= 0 || columns <= 0) {
             throw new IllegalArgumentException("Rows and columns must be greater than zero");
         }
@@ -85,27 +85,22 @@ public class Board {
     }
 
     private boolean isSuccess() {
-        var flaggedButtonsWithMines = getButtonStream()
+        var flaggedButtonsWithMines = getFieldsStream()
                 .filter(b -> b.isFlagged() && b.containMine())
                 .count();
-        return flaggedButtonsWithMines == minePoints.size() && allButtonsWithoutMinesRevealed();
+        return flaggedButtonsWithMines == minePoints.size();
     }
 
-    private Stream<Field> getButtonStream() {
-        return Arrays.stream(gameBoard).flatMap(Arrays::stream);
-    }
 
     private void addButtonsFeatures() {
-        getButtonStream().forEach(b -> {
+        getFieldsStream().forEach(b -> {
             addObservers(b);
             countMinesAround(b);
         });
     }
 
-    private boolean allButtonsWithoutMinesRevealed() {
-        return getButtonStream()
-                .filter(b -> !b.containMine())
-                .allMatch(b -> b.getState() == FieldState.REVEALED);
+    private Stream<Field> getFieldsStream() {
+        return Arrays.stream(gameBoard).flatMap(Arrays::stream);
     }
 
     private void createGameBoard() {
