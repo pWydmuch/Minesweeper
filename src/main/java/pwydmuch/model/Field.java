@@ -4,14 +4,14 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-class Field implements Observer, Serializable, Observable {
+class Field implements Serializable {
 
     private FieldState state = FieldState.NOT_MARKED;
 
     private int minesAroundNumber;
 
     private final boolean containMine;
-    private final Set<Observer> observers;
+    private final Set<Field> observers;
 
     private final int row;
     private final int column;
@@ -49,7 +49,6 @@ class Field implements Observer, Serializable, Observable {
     }
 
     //TODO -> state pattern for button??
-    @Override
     public void update() {
         if (state == FieldState.NOT_MARKED && !containMine) {
             state = FieldState.REVEALED;
@@ -87,14 +86,12 @@ class Field implements Observer, Serializable, Observable {
         return isFlagged;
     }
 
-    @Override
-    public void addObserver(Observer ob) {
-        observers.add(ob);
+    public void addObserver(Field observer) {
+        observers.add(observer);
     }
 
-    @Override
     public void notifyObservers() {
-        observers.forEach(Observer::update);
+        observers.forEach(Field::update);
     }
 
 

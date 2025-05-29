@@ -29,12 +29,7 @@ public class Board {
     }
 
     Board(int rows, int columns, Set<Point> minePoints) {
-        if(rows <= 0 || columns <= 0) {
-            throw new IllegalArgumentException("Rows and columns must be greater than zero");
-        }
-        if (columns * rows < minePoints.size()) {
-            throw new IllegalArgumentException("Too many mines for given board size");
-        }
+        checkIfCorrect(rows, columns, minePoints);
         this.gameBoard = new Field[rows][columns];
         this.minePoints = minePoints;
         this.remainingFlagsToSet = minePoints.size();
@@ -57,7 +52,7 @@ public class Board {
         if (buttonClicked.containMine()) gameStatus = GameStatus.GAME_OVER;
         if (isSuccess()) gameStatus = GameStatus.SUCCESS;
         buttonClicked.update();
-        return new LeftClickResponse(gameStatus, getFieldDtos() ,minePoints);
+        return new LeftClickResponse(gameStatus, getFieldDtos(), minePoints);
     }
 
     public GameState getGameState() {
@@ -67,6 +62,15 @@ public class Board {
                 gameStatus,
                 remainingFlagsToSet
         );
+    }
+
+    private static void checkIfCorrect(int rows, int columns, Set<Point> minePoints) {
+        if (rows <= 0 || columns <= 0) {
+            throw new IllegalArgumentException("Rows and columns must be greater than zero");
+        }
+        if (columns * rows < minePoints.size()) {
+            throw new IllegalArgumentException("Too many mines for given board size");
+        }
     }
 
     private List<FieldDto> getFieldDtos() {
@@ -85,10 +89,8 @@ public class Board {
     }
 
     private boolean isSuccess() {
-        var flaggedButtonsWithMines = getFieldsStream()
-                .filter(b -> b.isFlagged() && b.containMine())
-                .count();
-        return flaggedButtonsWithMines == minePoints.size();
+        return minePoints.stream()
+                .allMatch(point -> gameBoard[point.x()][point.y()].isFlagged());
     }
 
 
@@ -111,21 +113,21 @@ public class Board {
         }
     }
 
-    private void countMinesAround(Field b) {
+    private void countMinesAround(Field field) {
         var minesAroundNumber = new AtomicInteger(0);
         BiConsumer<Integer, Integer> countBombs = (r, c) ->
                 minesAroundNumber.addAndGet(gameBoard[r][c].containMine() ? 1 : 0);
-        browseBoardAroundButton(b, countBombs);
-        b.setMinesAround(minesAroundNumber.get());
+        browseBoardAroundButton(field, countBombs);
+        field.setMinesAround(minesAroundNumber.get());
     }
 
-    private void addObservers(Field b) {
-        browseBoardAroundButton(b, (r, c) -> b.addObserver(gameBoard[r][c]));
+    private void addObservers(Field field) {
+        browseBoardAroundButton(field, (r, c) -> field.addObserver(gameBoard[r][c]));
     }
 
-    private void browseBoardAroundButton(Field b, BiConsumer<Integer, Integer> fun) {
-        var row = b.getRow();
-        var column = b.getColumn();
+    private void browseBoardAroundButton(Field field, BiConsumer<Integer, Integer> fun) {
+        var row = field.getRow();
+        var column = field.getColumn();
         for (var r = row - 1; r <= row + 1; r++) {
             for (var c = column - 1; c <= column + 1; c++) {
                 if (isCellWithinBoardLimits(r, c) && isNotTheSameCell(row, column, r, c)) {
