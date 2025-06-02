@@ -1,7 +1,10 @@
-package pwydmuch.model;
+package pwydmuch.domain;
 
 
 import org.junit.jupiter.api.Test;
+import pwydmuch.domain.dtos.FieldState;
+import pwydmuch.domain.dtos.GameStatus;
+import pwydmuch.domain.dtos.Point;
 
 import java.util.Set;
 

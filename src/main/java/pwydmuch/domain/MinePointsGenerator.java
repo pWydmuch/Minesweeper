@@ -1,5 +1,8 @@
-package pwydmuch.model;
+package pwydmuch.domain;
 
+
+import pwydmuch.domain.dtos.GameConfig;
+import pwydmuch.domain.dtos.Point;
 
 import java.io.Serializable;
 import java.util.HashSet;

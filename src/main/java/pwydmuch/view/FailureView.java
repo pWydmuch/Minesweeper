@@ -1,7 +1,7 @@
 package pwydmuch.view;
 
-import pwydmuch.model.Board;
-import pwydmuch.model.GameConfig;
+import pwydmuch.domain.Board;
+import pwydmuch.domain.dtos.GameConfig;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

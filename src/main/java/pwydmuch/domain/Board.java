@@ -1,4 +1,6 @@
-package pwydmuch.model;
+package pwydmuch.domain;
+
+import pwydmuch.domain.dtos.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -34,7 +36,7 @@ public class Board {
         this.minePoints = minePoints;
         this.remainingFlagsToSet = minePoints.size();
         createGameBoard();
-        addButtonsFeatures();
+        addFieldsFeatures();
     }
 
     public RightClickResponse clickRight(int row, int column) {
@@ -44,7 +46,7 @@ public class Board {
             case QUESTION_MARK -> ++remainingFlagsToSet;
         }
         if (isSuccess()) gameStatus = GameStatus.SUCCESS;
-        return new RightClickResponse(gameStatus, FieldDto.fromField(fieldClicked), remainingFlagsToSet);
+        return new RightClickResponse(gameStatus, fieldClicked.toFieldDto(), remainingFlagsToSet);
     }
 
     public LeftClickResponse clickLeft(int row, int column) {
@@ -64,6 +66,14 @@ public class Board {
         );
     }
 
+    public GameConfig getGameConfig() {
+        return new GameConfig(
+                gameBoard.length,
+                gameBoard[0].length,
+                minePoints.size()
+        );
+    }
+
     private static void checkIfCorrect(int rows, int columns, Set<Point> minePoints) {
         if (rows <= 0 || columns <= 0) {
             throw new IllegalArgumentException("Rows and columns must be greater than zero");
@@ -76,16 +86,8 @@ public class Board {
     private List<FieldDto> getFieldDtos() {
         return Arrays.stream(gameBoard)
                 .flatMap(Arrays::stream)
-                .map(FieldDto::fromField)
+                .map(Field::toFieldDto)
                 .toList();
-    }
-
-    public GameConfig getGameConfig() {
-        return new GameConfig(
-                gameBoard.length,
-                gameBoard[0].length,
-                minePoints.size()
-        );
     }
 
     private boolean isSuccess() {
@@ -94,10 +96,10 @@ public class Board {
     }
 
 
-    private void addButtonsFeatures() {
-        getFieldsStream().forEach(b -> {
-            addObservers(b);
-            countMinesAround(b);
+    private void addFieldsFeatures() {
+        getFieldsStream().forEach(field -> {
+            addObservers(field);
+            countMinesAround(field);
         });
     }
 
@@ -117,32 +119,32 @@ public class Board {
         var minesAroundNumber = new AtomicInteger(0);
         BiConsumer<Integer, Integer> countBombs = (r, c) ->
                 minesAroundNumber.addAndGet(gameBoard[r][c].containMine() ? 1 : 0);
-        browseBoardAroundButton(field, countBombs);
+        browseBoardAroundField(field, countBombs);
         field.setMinesAround(minesAroundNumber.get());
     }
 
     private void addObservers(Field field) {
-        browseBoardAroundButton(field, (r, c) -> field.addObserver(gameBoard[r][c]));
+        browseBoardAroundField(field, (r, c) -> field.addObserver(gameBoard[r][c]));
     }
 
-    private void browseBoardAroundButton(Field field, BiConsumer<Integer, Integer> fun) {
-        var row = field.getRow();
-        var column = field.getColumn();
-        for (var r = row - 1; r <= row + 1; r++) {
-            for (var c = column - 1; c <= column + 1; c++) {
-                if (isCellWithinBoardLimits(r, c) && isNotTheSameCell(row, column, r, c)) {
-                    fun.accept(r, c);
-                }
+    private static final int[][] NEIGHBOR_OFFSETS = {
+            {-1, -1}, {-1, 0}, {-1, 1},
+            { 0, -1},          { 0, 1},
+            { 1, -1}, { 1, 0}, { 1, 1}
+    };
+
+    private void browseBoardAroundField(Field field, BiConsumer<Integer, Integer> fun) {
+        for (int[] offset : NEIGHBOR_OFFSETS) {
+            int r = field.getRow() + offset[0];
+            int c = field.getColumn() + offset[1];
+            if (isCellWithinBoardLimits(r, c)) {
+                fun.accept(r, c);
             }
         }
     }
 
-    private static boolean isNotTheSameCell(int row, int column, int r, int c) {
-        return !(r == row && c == column);
-    }
-
     private boolean isCellWithinBoardLimits(int r, int c) {
-        return r >= 0 && c >= 0 && c < gameBoard[0].length && r < gameBoard.length;
+        return r >= 0 && r < gameBoard.length && c >= 0 && c < gameBoard[0].length;
     }
 
 }

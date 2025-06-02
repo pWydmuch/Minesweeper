@@ -1,7 +1,6 @@
 package pwydmuch.view;
 
-import pwydmuch.model.Board;
-import pwydmuch.model.FieldDto;
+import pwydmuch.domain.dtos.FieldDto;
 
 import javax.swing.*;
 

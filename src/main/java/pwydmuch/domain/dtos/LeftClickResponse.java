@@ -1,4 +1,4 @@
-package pwydmuch.model;
+package pwydmuch.domain.dtos;
 
 import java.util.List;
 import java.util.Set;

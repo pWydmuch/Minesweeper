@@ -1,6 +1,7 @@
 package pwydmuch.view;
 
-import pwydmuch.model.*;
+import pwydmuch.domain.*;
+import pwydmuch.domain.dtos.*;
 
 import javax.swing.*;
 import java.awt.*;

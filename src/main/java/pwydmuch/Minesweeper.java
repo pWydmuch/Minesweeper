@@ -1,6 +1,6 @@
 package pwydmuch;
 
-import pwydmuch.model.Board;
+import pwydmuch.domain.Board;
 import pwydmuch.view.MainView;
 
 import java.io.*;

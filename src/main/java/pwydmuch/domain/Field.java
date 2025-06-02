@@ -1,4 +1,7 @@
-package pwydmuch.model;
+package pwydmuch.domain;
+
+import pwydmuch.domain.dtos.FieldDto;
+import pwydmuch.domain.dtos.FieldState;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -49,7 +52,7 @@ class Field implements Serializable {
     }
 
     //TODO -> state pattern for button??
-    public void update() {
+    void update() {
         if (state == FieldState.NOT_MARKED && !containMine) {
             state = FieldState.REVEALED;
             if (minesAroundNumber == 0) {
@@ -70,29 +73,27 @@ class Field implements Serializable {
         return column;
     }
 
-    FieldState getState() {
-        return state;
+    FieldDto toFieldDto() {
+        return new FieldDto(row, column, getMinesAround(), state);
+    }
+    private Integer getMinesAround() {
+        return state == FieldState.REVEALED ? minesAroundNumber : null;
     }
 
     boolean containMine() {
         return containMine;
     }
 
-    int getMinesAroundNumber() {
-        return minesAroundNumber;
-    }
-
     boolean isFlagged() {
         return isFlagged;
     }
 
-    public void addObserver(Field observer) {
+    void addObserver(Field observer) {
         observers.add(observer);
     }
 
-    public void notifyObservers() {
+    private void notifyObservers() {
         observers.forEach(Field::update);
     }
-
 
 }

@@ -1,4 +1,4 @@
-package pwydmuch.model;
+package pwydmuch.domain.dtos;
 
 public record GameConfig(int rows, int columns, int minesNumber) {
     public GameConfig {
