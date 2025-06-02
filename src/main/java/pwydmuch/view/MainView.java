@@ -14,7 +14,6 @@ import java.util.Optional;
 
 import static pwydmuch.view.ImageLoader.*;
 
-
 public class MainView implements WindowListener, View {
 
     private final static int BUTTON_WIDTH = 35;
@@ -23,17 +22,15 @@ public class MainView implements WindowListener, View {
     private final static String CLOSE_LABEL = "Close";
     private final static String NEW_GAME_LABEL = "New Game";
     private final Board board;
-    private Timer timer;    // SPROBUJ USTAWIC TEN WATEK JAKO DEMON
+    private GameTimer timer;
     private MyButtonAdapter[][] gameBoardAdapter;
     private final RightMouseButton rightMouseButton;
     private final LeftMouseButton leftMouseButton;
     private final JFrame frame;
     private JPanel jp;
     private final GameConfig gameConfig;
-    private int time;
     private final JLabel timeLabel;
     private final JLabel minesLeftLabel;
-
 
     public MainView(Board board) {
         this.board = board;
@@ -43,6 +40,7 @@ public class MainView implements WindowListener, View {
         this.leftMouseButton = new LeftMouseButton();
         this.rightMouseButton = new RightMouseButton();
         this.timeLabel = new JLabel("0");
+        this.timer = new GameTimer(time -> timeLabel.setText(String.valueOf(time)));
         this.gameBoardAdapter = translate(board.getGameState().fieldDtos());
         showView();
         frame.validate(); /* jak sie wlacza to od razu jest plansza nie trzeba przesiagac? */
@@ -50,7 +48,7 @@ public class MainView implements WindowListener, View {
 
 
     int getTime() {
-        return time;
+        return timer.getTime();
     }
 
     JFrame getFrame() {
@@ -208,7 +206,6 @@ public class MainView implements WindowListener, View {
     }
 
     class RightMouseButton implements MouseListener, Serializable {
-
         @Override
         public void mouseClicked(MouseEvent e) {
             if (SwingUtilities.isRightMouseButton(e)) {
@@ -222,7 +219,6 @@ public class MainView implements WindowListener, View {
                     minesLeftLabel.setText(String.valueOf(response.remainingFlagsToSet()));
                     if (response.gameStatus().equals(GameStatus.SUCCESS)) {
                         timer.stop();
-                        timer.setDelay(Integer.MAX_VALUE);
                         new SuccessView(MainView.this, gameConfig).showView();
                     }
                 });
@@ -248,12 +244,11 @@ public class MainView implements WindowListener, View {
     }
 
     class LeftMouseButton implements MouseListener, Serializable {
-        transient private boolean timerAlreadyTurnedOn = false;
 
         @Override
         public void mouseClicked(MouseEvent e) {
             if (SwingUtilities.isLeftMouseButton(e)) {
-                startTimer(); //TODO seems like timer should be in model -> shouldn't it?
+                timer.start();
                 getButtonClicked(e).ifPresent(button -> {
                     LeftClickResponse response = board.clickLeft(button.getRow(), button.getColumn());
                     if (response.gameStatus().equals(GameStatus.GAME_OVER)) {
@@ -261,6 +256,7 @@ public class MainView implements WindowListener, View {
                             gameBoardAdapter[p.x()][p.y()].setIcon(BOMB_ICON);
                             gameBoardAdapter[p.x()][p.y()].setBackground(Color.RED);
                         });
+                        timer.stop();
                         new FailureView(board, gameConfig, MainView.this.frame).showView();
                     } else {
                         button.removeMouseListener(leftMouseButton);
@@ -271,17 +267,6 @@ public class MainView implements WindowListener, View {
             }
         }
 
-        private void startTimer() {
-            if (!timerAlreadyTurnedOn) {
-                timer = new Timer(1000, __ -> {
-                    //timeLabel.setText("");
-                    time++;
-                    timeLabel.setText(String.valueOf(time));
-                });
-                timer.start();
-                timerAlreadyTurnedOn = true;
-            }
-        }
 
         @Override
         public void mouseReleased(MouseEvent e) {
