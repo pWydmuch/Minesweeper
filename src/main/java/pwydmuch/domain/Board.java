@@ -30,7 +30,7 @@ public class Board {
         return new Board(gameBoard.length, gameBoard[0].length, minePoints);
     }
 
-    Board(int rows, int columns, Set<Point> minePoints) {
+    public Board(int rows, int columns, Set<Point> minePoints) {
         checkIfCorrect(rows, columns, minePoints);
         this.gameBoard = new Field[rows][columns];
         this.minePoints = minePoints;
@@ -146,5 +146,4 @@ public class Board {
     private boolean isCellWithinBoardLimits(int r, int c) {
         return r >= 0 && r < gameBoard.length && c >= 0 && c < gameBoard[0].length;
     }
-
 }

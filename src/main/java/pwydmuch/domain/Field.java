@@ -95,5 +95,4 @@ class Field implements Serializable {
     private void notifyObservers() {
         observers.forEach(Field::update);
     }
-
 }

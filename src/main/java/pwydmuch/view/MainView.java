@@ -47,8 +47,12 @@ public class MainView implements WindowListener, View {
     }
 
 
-    int getTime() {
+    public int getTime() {
         return timer.getTime();
+    }
+
+    public Board getBoard() {
+        return board;
     }
 
     JFrame getFrame() {
