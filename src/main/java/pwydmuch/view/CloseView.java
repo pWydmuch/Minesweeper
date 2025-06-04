@@ -1,6 +1,7 @@
 package pwydmuch.view;
 
 import pwydmuch.Minesweeper;
+import pwydmuch.service.GameStateService;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -18,6 +19,7 @@ public class CloseView extends JFrame implements View {
     private final JButton dontSaveButton;
     private final JButton cancelButton;
     private final MainView mainView;
+    private final GameStateService gameStateService;
 
     CloseView(MainView mainView, int columns) {
         this.columns = columns;
@@ -25,6 +27,7 @@ public class CloseView extends JFrame implements View {
         this.frameY = mainView.getFrame().getY();
         this.frameHeight = mainView.getFrame().getHeight();
         this.mainView = mainView;
+        this.gameStateService = new GameStateService();
         saveButton = new JButton(SAVE);
         dontSaveButton = new JButton(DONT_SAVE);
         cancelButton = new JButton(CANCEL);
@@ -57,16 +60,16 @@ public class CloseView extends JFrame implements View {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == saveButton) {
-            Minesweeper.save(mainView);
+            gameStateService.saveGameState(mainView.getBoard(), mainView.getTime());
+            mainView.getFrame().dispose();
             System.exit(0);
-        }
-        if (e.getSource() == dontSaveButton) {
-//            MainView sap1 = new MainView(mainView.getRows(), mainView.getColumns(), mainView.getMinesNumber());
-//            sap1.go();
-//            pwydmuch.Minesweeper.save(sap1);
+        } else if (e.getSource() == dontSaveButton) {
+            gameStateService.clearSavedState();
+            mainView.getFrame().dispose();
             System.exit(0);
+        } else if (e.getSource() == cancelButton) {
+            this.dispose();
         }
-        this.dispose();
     }
 
 }

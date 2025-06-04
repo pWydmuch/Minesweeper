@@ -8,51 +8,23 @@ import pwydmuch.domain.dtos.Point;
 import java.sql.*;
 import java.util.HashSet;
 import java.util.Set;
+import org.flywaydb.core.Flyway;
 
 public class GameStateService {
-    private static final String DB_URL = "jdbc:sqlite:minesweeper.db";
+    private final String dbUrl;
     
     public GameStateService() {
-        initializeDatabase();
+        this("jdbc:sqlite:minesweeper.db");
     }
     
-    private void initializeDatabase() {
-        try (Connection conn = DriverManager.getConnection(DB_URL)) {
-            try (Statement stmt = conn.createStatement()) {
-                // Create game_state table
-                stmt.execute("""
-                    CREATE TABLE IF NOT EXISTS game_state (
-                        id INTEGER PRIMARY KEY,
-                        rows INTEGER NOT NULL,
-                        columns INTEGER NOT NULL,
-                        mines_number INTEGER NOT NULL,
-                        game_status TEXT NOT NULL,
-                        time INTEGER NOT NULL,
-                        remaining_flags INTEGER NOT NULL
-                    )
-                """);
-                
-                // Create fields table
-                stmt.execute("""
-                    CREATE TABLE IF NOT EXISTS fields (
-                        game_id INTEGER,
-                        row INTEGER NOT NULL,
-                        column INTEGER NOT NULL,
-                        state TEXT NOT NULL,
-                        has_mine BOOLEAN NOT NULL,
-                        mines_around INTEGER,
-                        FOREIGN KEY (game_id) REFERENCES game_state(id),
-                        PRIMARY KEY (game_id, row, column)
-                    )
-                """);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to initialize database", e);
-        }
+    public GameStateService(String dbUrl) {
+        this.dbUrl = dbUrl;
+        Flyway flyway = Flyway.configure().dataSource(dbUrl, null, null).load();
+        flyway.migrate();
     }
     
     public void saveGameState(Board board, int time) {
-        try (Connection conn = DriverManager.getConnection(DB_URL)) {
+        try (Connection conn = DriverManager.getConnection(dbUrl)) {
             conn.setAutoCommit(false);
             try {
                 // Clear previous state
@@ -113,14 +85,15 @@ public class GameStateService {
     }
     
     public Board loadLastGameState() {
-        try (Connection conn = DriverManager.getConnection(DB_URL)) {
+        try (Connection conn = DriverManager.getConnection(dbUrl)) {
             try (Statement stmt = conn.createStatement()) {
                 // Get the game state
                 try (ResultSet rs = stmt.executeQuery("SELECT * FROM game_state")) {
                     if (rs.next()) {
                         int rows = rs.getInt("rows");
                         int columns = rs.getInt("columns");
-                        
+                        int minesNumber = rs.getInt("mines_number");
+
                         // Get mine points
                         Set<Point> minePoints = new HashSet<>();
                         try (PreparedStatement pstmt = conn.prepareStatement(
@@ -134,8 +107,28 @@ public class GameStateService {
                                 }
                             }
                         }
-                        
-                        return new Board(rows, columns, minePoints);
+
+                        // Create the board with mine points
+                        Board board = new Board(rows, columns, minePoints);
+
+                        // Restore field states
+                        try (PreparedStatement pstmt = conn.prepareStatement(
+                            "SELECT row, column, state FROM fields")) {
+                            try (ResultSet fieldsRs = pstmt.executeQuery()) {
+                                while (fieldsRs.next()) {
+                                    int row = fieldsRs.getInt("row");
+                                    int col = fieldsRs.getInt("column");
+                                    String state = fieldsRs.getString("state");
+                                    // Set the field state using right/left click simulation
+                                    switch (state) {
+                                        case "FLAG" -> board.clickRight(row, col);
+                                        case "REVEALED" -> board.clickLeft(row, col);
+                                        // NOT_MARKED and QUESTION_MARK are not handled for simplicity
+                                    }
+                                }
+                            }
+                        }
+                        return board;
                     }
                 }
             }
@@ -143,5 +136,16 @@ public class GameStateService {
             throw new RuntimeException("Failed to load game state", e);
         }
         return null;
+    }
+    
+    public void clearSavedState() {
+        try (Connection conn = DriverManager.getConnection(dbUrl)) {
+            try (Statement stmt = conn.createStatement()) {
+                stmt.execute("DELETE FROM fields");
+                stmt.execute("DELETE FROM game_state");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to clear saved state", e);
+        }
     }
 } 
